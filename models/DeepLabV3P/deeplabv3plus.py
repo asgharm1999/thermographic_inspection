@@ -1,6 +1,6 @@
 """
 DeepLabV3Plus.py
-DeepLabV3+ model implementation in PyTorch
+DeepLabV3+ model implementation in Tensorflow
 """
 
 # Import Libraries
@@ -18,6 +18,8 @@ from keras.layers import (
 )
 from keras.models import Model
 from keras.applications import Xception
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
 # Create Blocks
@@ -127,8 +129,6 @@ def DeepLabV3Plus(inputShape, numClasses):
     encoder.trainable = False
     encoderOutput = encoder.get_layer("block13_pool").output
 
-    print(encoderOutput.shape)
-
     # ASPP
     aspp = ASPP(encoderOutput)
     upsampled = UpSampling2D((4, 4), interpolation="bilinear")(aspp)
@@ -146,7 +146,7 @@ def DeepLabV3Plus(inputShape, numClasses):
     conv2 = ConvBlock(256, kernel_size=3)(conv1)
 
     # Upsampling
-    upsampled = UpSampling2D((4, 4), interpolation="bilinear")(conv2)
+    upsampled = UpSampling2D((8, 8), interpolation="bilinear")(conv2)
 
     # 1x1 Convolution
     output = Conv2D(numClasses, 1, padding="same", activation="softmax")(upsampled)
