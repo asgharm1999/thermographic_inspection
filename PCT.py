@@ -6,6 +6,7 @@ Provides the PCT function for Principal Component Thermography
 import cv2
 import numpy as np
 import plotly.express as px
+from sklearn.decomposition import PCA
 
 def readVideo(path: str, channels: int = 3):
     '''
@@ -49,37 +50,82 @@ def readVideo(path: str, channels: int = 3):
     return matrix
 
 
-def PCT(video: np.ndarray):
+def PCT(video: np.ndarray, name: str, method: str = 'PCA'):
     '''
     Performs Principal Component Thermography on a video with 1 channel
+
+    Parameters
+    ----------
+    video : numpy array
+        Numpy array of the video file
+    name : str
+        Name of file to save results as
+    method : str
+        Method to use for PCT. Can be 'PCA' or 'SVD'
     '''
 
     # Reshape video from (frames, height, width) to (height*width, frames)
     height, width = video.shape[1], video.shape[2]
 
-    video = video.reshape(video.shape[0], video.shape[1]*video.shape[2])
+    video = video.reshape(video.shape[0], height*width)
     video = video.T
 
-    # Perform normalization on the video
-    print("Normalizing video...")
-    video = video - np.mean(video, axis=0)
+    if method == 'PCA':
+        # Perform PCA on the video
+        print('Performing PCA...')
+        pca = PCA(n_components=2)
+        principalComponents = pca.fit_transform(video)
 
-    # Perform SVD on the video
-    print("Performing SVD...")
-    U, S, V = np.linalg.svd(video, full_matrices=False)
+        # Get EOFs
+        EOF1 = principalComponents[:, 0].reshape(height, width)
+        EOF2 = principalComponents[:, 1].reshape(height, width)
 
-    # Get EOFs
-    U = U.T
-    EOF1 = U[0].reshape(height, width)
-    EOF2 = U[1].reshape(height, width)
+        # Normalize EOFs
+        def normalize(x):
+            min = np.min(x)
+            max = np.max(x)
+            return ((x - min) / (max - min) * 255).astype('uint8')
+        
+        print('Normalizing results...')
+        EOF1 = normalize(EOF1)
+        EOF2 = normalize(EOF2)
 
-    # Show EOFs as thermograms
-    
-    fig1 = px.imshow(EOF1, title='EOF1')
-    fig1.write_image("EOF1.png", format="png")
+        # Turn to colormap
+        EOF1 = cv2.applyColorMap(EOF1, cv2.COLORMAP_JET)
+        EOF2 = cv2.applyColorMap(EOF2, cv2.COLORMAP_JET)
 
-    fig2 = px.imshow(EOF2, title='EOF2')
-    fig2.write_image("EOF2.png")
+        # Show EOFs as thermograms
+        cv2.imshow("EOF1", EOF1)
+        cv2.imshow("EOF2", EOF2)
+
+        # Save EOFs as images
+        cv2.imwrite(name + '_EOF1.png', EOF1)
+        cv2.imwrite(name + '_EOF2.png', EOF2)
+
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    elif method == 'SVD':
+        # Perform normalization on the video
+        print("Normalizing video...")
+        video = video - np.mean(video, axis=0)
+
+        # Perform SVD on the video
+        print("Performing SVD...")
+        U, S, V = np.linalg.svd(video, full_matrices=False)
+
+        # Get EOFs
+        U = U.T
+        EOF1 = U[0].reshape(height, width)
+        EOF2 = U[1].reshape(height, width)
+
+        # Show EOFs as thermograms
+        
+        fig1 = px.imshow(EOF1, title='EOF1')
+        fig1.write_image(name + '_EOF1.png', format="png")
+
+        fig2 = px.imshow(EOF2, title='EOF2')
+        fig2.write_image(name + '_EOF2.png')
 
 
 # Test code
@@ -87,4 +133,4 @@ if __name__ == '__main__':
     print("Reading Video...")
     video = readVideo('vid-edited2.mp4')
 
-    PCT(video)
+    PCT(video, 'SVD')
