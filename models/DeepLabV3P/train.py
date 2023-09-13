@@ -38,7 +38,7 @@ with strategy.scope():
     # TODO: Load dataset
 
     # Load model
-    model = DeepLabV3Plus((512, 512, 3), 1)  # TODO: Change input shape and number of classes
+    model = DeepLabV3Plus((512, 512, 3), 2)  # TODO: Change input shape and number of classes
 
     # Compile model
     model.compile(
@@ -54,7 +54,8 @@ with strategy.scope():
         ),
         WandbMetricsLogger(),
         WandbModelCheckpoint(
-            monitor="val_loss", save_weights_only=True, save_best_only=True
+            monitor="val_loss", save_weights_only=True, save_best_only=True,
+            filepath=f'/checkpoints/{args.name}-{epoch}-{val_loss:.2f}'
         ),
     ]
 

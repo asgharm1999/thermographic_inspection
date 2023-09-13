@@ -287,14 +287,4 @@ def preProcess(afterFile: str, beforeFile: str, debug: bool = False):
 
 # Test code
 if __name__ == '__main__':
-    # print("Reading Video...")
-    # video = readVideo('vid-edited2.mp4')
-    # before = readVideo('before-edited2.mp4')
-
-    # PCT(video, 'Heated', 'PCA')
-    # PCT(before, 'Unheated', 'PCA')
-
-    # heated = cv2.imread('Heated_EOF1.png')
-    # unheated = cv2.imread('Unheated_EOF1.png')
-
-    preProcess('images/left_after_09_11', 'images/left_before_09_11', debug=False)
+    preProcess('images/left_after_09_11_2', 'images/left_before_09_11_2', debug=False)
