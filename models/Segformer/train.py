@@ -7,6 +7,7 @@ from transformers import (
     SegformerImageProcessor,
     SegformerForSemanticSegmentation,
     TrainingArguments,
+    Trainer,
 )
 import evaluate
 
@@ -27,7 +28,7 @@ args = parser.parse_args()
 
 # Initialize WandB
 wandb.init(
-    project="projectName",  # TODO: Set project name
+    project="test",  # TODO: Set project name
     config={
         "modelName": args.modelName,
         "batchSize": args.batchSize,
@@ -44,7 +45,7 @@ config = wandb.config
 # Load dataset
 train, test = load_dataset("nameOfDataset", split=["train", "test"])  # TODO: Set dataset name
 
-id2label = {0: "background", 1: "object"}  # TODO: Set id2label
+id2label = {0: "background", 1: "object"}
 label2id = {v: k for k, v in id2label.items()}
 numLabels = len(id2label)
 
