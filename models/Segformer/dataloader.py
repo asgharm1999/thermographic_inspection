@@ -6,10 +6,10 @@ from datasets import Dataset, DatasetDict, Image
 from pandas import DataFrame
 import glob
 
-imageTrain = glob.glob("path/to/train/images/*.jpg")
+imageTrain = glob.glob("path/to/train/images/*.png")
 maskTrain = glob.glob("path/to/train/masks/*.png")
 
-imageTest = glob.glob("path/to/test/images/*.jpg")
+imageTest = glob.glob("path/to/test/images/*.png")
 maskTest = glob.glob("path/to/test/masks/*.png")
 
 def createDataset(imagePaths, maskPaths):
@@ -17,7 +17,7 @@ def createDataset(imagePaths, maskPaths):
 
     dataset = Dataset.from_pandas(DataFrame(pairs, columns=["image", "label"]))
     dataset = dataset.cast_column("image", Image())
-    dataset = dataset.cast_column("label", Image(decode=True, id=False))
+    dataset = dataset.cast_column("label", Image(decode=True, id=None))
 
     return dataset
 
