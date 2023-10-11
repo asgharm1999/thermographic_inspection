@@ -7,6 +7,8 @@ import cv2
 import numpy as np
 from sklearn.decomposition import PCA
 
+from imageStitcher import stitchVideo
+
 
 def readVideo(path: str, channels: int = 3):
     """
@@ -104,7 +106,7 @@ def PCT(video: np.ndarray, path: str):
     # Save EOFs as images
     path = path.removeprefix("videos/")
     year, month, day, distance, _, side = path.split("-")
-    newPath = f"data/images/{year}-{month}-{day}-{distance}-{side}"
+    newPath = f"images/{year}-{month}-{day}-{distance}-{side}"
 
     print(newPath + "_EOF1.png")
 
@@ -144,13 +146,20 @@ def createMask(vid1Name, vid2Name, debug: bool = False):
 
     cap1 = cv2.VideoCapture(vid1Name + ".mp4")
     cap2 = cv2.VideoCapture(vid2Name + ".mp4")
-    fps = 30
+    fps = cap1.get(cv2.CAP_PROP_FPS)
 
     # Read the first frame to determine frame dimensions
     ret, frame = cap1.read()
     if not ret:
         print("Error: Cannot read video file.")
         exit()
+    
+    # First few frames may be blank, so allow frame skipping
+    while np.mean(frame) < 10:
+        ret, frame = cap1.read()
+        if not ret:
+            print("Error: Cannot read video file.")
+            exit()
 
     # Create a window to display the video and select ROI
     cv2.namedWindow("Select ROI")
@@ -162,6 +171,8 @@ def createMask(vid1Name, vid2Name, debug: bool = False):
 
     # Get the ROI for each frame
     print("Cropping videos...")
+    roiFrame = frame[y: y+h, x: x+h]
+    writer1.write(roiFrame)
     while True:
         ret, frame = cap1.read()
         if not ret:
@@ -185,6 +196,9 @@ def createMask(vid1Name, vid2Name, debug: bool = False):
         ret, frame = cap2.read()
         if not ret:
             break
+
+        if np.mean(frame) < 10:
+            continue
 
         # Crop the frame to the selected ROI
         roiFrame = frame[y : y + h, x : x + w]
@@ -210,17 +224,37 @@ def createMask(vid1Name, vid2Name, debug: bool = False):
     return output1Name, output2Name
 
 
-def preProcess(afterFile: str, beforeFile: str, debug: bool = False):
+def preProcess(date: str, dist: str, debug: bool = False):
     """
     Highlights defects by performing 'cold substraction' on the heated and unheated videos
 
     Parameters
     ----------
-    afterFile : str
-        Path to the after video (without extension)
-    beforeFile : str
-        Path to the before video (without extension)
+    date : str
+        Date of the video in YYYY-MM-DD format
+    dist : str
+        Distance of the video in DD format
     """
+    beforeLeft = f"videos/{date}-{dist}-before-left.mp4"
+    beforeRight = f"videos/{date}-{dist}-before-right.mp4"
+    afterLeft = f"videos/{date}-{dist}-after-left.mp4"
+    afterRight = f"videos/{date}-{dist}-after-right.mp4"
+
+    beforeFile = f"videos/{date}-{dist}-before"
+    afterFile = f"videos/{date}-{dist}-after"
+
+    status = stitchVideo([beforeLeft, beforeRight], beforeFile + ".mp4")
+    if not status:
+        print("Error stitching before videos")
+        exit()
+
+    status = stitchVideo([afterLeft, afterRight], afterFile + ".mp4")
+    if not status:
+        print("Error stitching after videos")
+        exit()
+
+    # Stitch videos
+    # TODO: Stitch videos
 
     # Create Mask
     print("Creating mask...")
@@ -271,4 +305,4 @@ def preProcess(afterFile: str, beforeFile: str, debug: bool = False):
 
 # Test code
 if __name__ == "__main__":
-    preProcess("videos/2023-09-15-15-before-right", "videos/2023-09-15-15-after-right", debug=False)
+    preProcess("2023-09-12", "10", debug=False)
