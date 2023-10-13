@@ -1,55 +1,76 @@
 # Import Libraries
 from transformers import pipeline
 from PIL import Image
-import glob
 import numpy as np
 import matplotlib.pyplot as plt
+from huggingface_hub import hf_hub_download
+import json
 
 # Load model
-segmenter = pipeline("image-segmentation", model="modelName")
+segmenter = pipeline(
+    "image-segmentation", model="ChristopherS27/testModel"
+)  # TODO: Set model name
 
 # Read images
-testImage = Image.open("data/images/name.png")
-testMask = Image.open("data/masks/name.png")
+testImage = Image.open("data/TIR/TIR-SS/Img8bit/val/64_1332.bmp")
+testMask = Image.open("data/TIR/TIR-SS/gtFine/val/64_1332.png")
 
-def maskToRGB(mask, type: str):
+# Get mappings
+id2label = hf_hub_download(
+    repo_id="ChristopherS27/TIR", filename="id2label.json", repo_type="dataset"
+)
+id2label = json.load(open(id2label, "r"))
+id2label = {int(k): v for k, v in id2label.items()}
+label2id = {v: k for k, v in id2label.items()}
+
+label2color = {
+    label: list(np.random.choice(range(256), size=3))
+    if label != "background"
+    else [0, 0, 0]
+    for label in label2id.keys()
+}
+
+
+# Convert mask to RGB
+def maskToRGB(mask, type: str | None = None):
     arr = np.zeros(mask.shape[:2] + (3,), dtype=np.uint8)
 
-    if type == "background":
-        pass
-    elif type == "class1":
-        for i in range(mask.shape[0]):
-            for j in range(mask.shape[1]):
+    for i in range(mask.shape[0]):
+        for j in range(mask.shape[1]):
+            if type != None:
                 if (mask[i][j] == [255, 255, 255]).all():
-                    arr[i][j] = [255, 0, 0]  # Set RGB values
-    elif type == "class2":
-        for i in range(mask.shape[0]):
-            for j in range(mask.shape[1]):
-                if (mask[i][j] == [255, 255, 255]).all():
-                    arr[i][j] = [0, 255, 0]  # Set RGB values
-    
+                    arr[i][j] = label2color[type]
+            else:
+                arr[i][j] = label2color[id2label[mask[i][j]]]
+
     return arr
 
-def label2num(label: str):
-    if label == "background":
-        return 0
-    elif label == "class1":
-        return 1
-    elif label == "class2":
-        return 2
-    
 
 # Predict
 res = segmenter(testImage)
-    
+
 fig, ax = plt.subplots(1, 2, figsize=(15, 15))
 
 ax[0].set_title("Prediction")
 ax[1].set_title("Ground Truth")
 
-for label in range(len(res)):
-    mask = maskToRGB(np.array(res[label]["mask"]), res[label]["label"])
-    ax[0].imshow(mask, alpha=0.5)
+predMask = np.zeros(np.array(testMask).shape[:2] + (3,), dtype=np.uint8)
+for index in range(len(res)):
+    label = res[index]["label"]
+    id = label2id[label]
 
-ax[0].imshow(testImage, alpha=0.5)
+    temp = np.array(res[index]["mask"])
+
+    for i in range(predMask.shape[0]):
+        for j in range(predMask.shape[1]):
+            if (temp[i][j] == [255, 255, 255]).all():
+                predMask[i][j] = label2color[label]
+
+
+ax[0].imshow(testImage)
+ax[0].imshow(predMask, alpha=0.5)
+
 ax[1].imshow(testImage)
+ax[1].imshow(maskToRGB(np.array(testMask)), alpha=0.5)
+
+plt.show()

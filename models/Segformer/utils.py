@@ -56,7 +56,7 @@ class Transform:
             images, labels = [], []
 
             for image, mask in zip(batch["image"], batch["mask"]):
-                transformed = self.transform(image=np.array(image.convert('RGB')), mask=np.array(mask))
+                transformed = self.transform(image=np.array(image), mask=np.array(mask))
                 images.append(transformed["image"])
                 labels.append(transformed["mask"])
 

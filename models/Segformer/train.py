@@ -2,6 +2,7 @@
 import wandb
 import argparse
 from datasets import load_dataset
+from huggingface_hub import hf_hub_download
 from transformers import (
     EarlyStoppingCallback,
     SegformerImageProcessor,
@@ -10,6 +11,7 @@ from transformers import (
     Trainer,
 )
 import evaluate
+import json
 
 from utils import Transform, ComputeMetrics
 
@@ -19,10 +21,14 @@ parser.add_argument("--lr", type=float, default=1e-4, help="Learning rate")
 parser.add_argument("--epochs", type=int, default=50, help="Number of epochs")
 parser.add_argument("--batchSize", type=int, default=6, help="Batch size")
 parser.add_argument("--earlyStop", type=int, default=10, help="Early stopping patience")
-parser.add_argument("--name", type=str, default="Test", help="Name of the run")
-parser.add_argument("--scheduler", type=str, default="polynomial", help="Learning rate scheduler")
+parser.add_argument("--name", type=str, default="testing", help="Name of the run")
+parser.add_argument(
+    "--scheduler", type=str, default="polynomial", help="Learning rate scheduler"
+)
 parser.add_argument("--modelName", type=str, default="nvidia/mit-b0", help="Model name")
-parser.add_argument("--evalMetric", type=str, default="mean_iou", help="Evaluation metric")
+parser.add_argument(
+    "--evalMetric", type=str, default="mean_iou", help="Evaluation metric"
+)
 
 args = parser.parse_args()
 
@@ -43,9 +49,14 @@ wandb.init(
 config = wandb.config
 
 # Load dataset
-train, test = load_dataset("ChristopherS27/bridgeSeg", split=["originalTrain", "originalTest"])  # TODO: Set dataset name
+train = load_dataset("ChristopherS27/TIR", split="train")
+test = load_dataset("ChristopherS27/TIR", split="test")
 
-id2label = {0: "good", 1: "fair", 2: "poor", 3: "severe"}
+id2label = hf_hub_download(
+    repo_id="ChristopherS27/TIR", filename="id2label.json", repo_type="dataset"
+)
+id2label = json.load(open(id2label, "r"))
+id2label = {int(k): v for k, v in id2label.items()}
 label2id = {v: k for k, v in id2label.items()}
 numLabels = len(id2label)
 
