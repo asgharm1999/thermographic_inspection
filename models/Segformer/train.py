@@ -43,16 +43,16 @@ wandb.init(
 config = wandb.config
 
 # Load dataset
-train, test = load_dataset("nameOfDataset", split=["train", "test"])  # TODO: Set dataset name
+train, test = load_dataset("ChristopherS27/bridgeSeg", split=["originalTrain", "originalTest"])  # TODO: Set dataset name
 
-id2label = {0: "background", 1: "object"}
+id2label = {0: "good", 1: "fair", 2: "poor", 3: "severe"}
 label2id = {v: k for k, v in id2label.items()}
 numLabels = len(id2label)
 
 # Preprocess dataset
-preprocessor = SegformerImageProcessor()
-train.set_transform(Transform(preprocessor, transform="None", isTrain=True))
-test.set_transform(Transform(preprocessor, transform="None", isTrain=False))
+preprocessor = SegformerImageProcessor(do_reduce_labels=True)
+train.set_transform(Transform(preprocessor, transform="none", isTrain=True))
+test.set_transform(Transform(preprocessor, transform="none", isTrain=False))
 
 # Define evaluation metrics
 metric = evaluate.load(config.evalMetric)

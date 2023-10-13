@@ -1,0 +1,15 @@
+
+Downloading readme: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████| 562/562 [00:00<?, ?B/s]
+Downloading data: 100%|███████████████████████████████████████████████████████████████████████████████████████████████| 954k/954k [00:00<00:00, 1.47MB/s]
+Downloading data: 100%|███████████████████████████████████████████████████████████████████████████████████████████████| 954k/954k [00:00<00:00, 2.91MB/s]
+Downloading data files: 100%|██████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00,  2.03it/s]
+Extracting data files: 100%|██████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00, 190.20it/s]
+Generating train split: 100%|███████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00, 99.77 examples/s]
+Generating test split: 100%|███████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00, 666.61 examples/s]
+Traceback (most recent call last):
+  File "C:\Users\chris\OneDrive\Documents\GitHub\thermographic_inspection\models\Segformer\train.py", line 54, in <module>
+    train.set_transform(Transform(preprocessor, transform="None", isTrain=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\chris\OneDrive\Documents\GitHub\thermographic_inspection\models\Segformer\utils.py", line 52, in __init__
+    raise ValueError("Invalid transform")
+ValueError: Invalid transform

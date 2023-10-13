@@ -6,18 +6,18 @@ from datasets import Dataset, DatasetDict, Image
 from pandas import DataFrame
 import glob
 
-imageTrain = glob.glob("path/to/train/images/*.png")
-maskTrain = glob.glob("path/to/train/masks/*.png")
+imageTrain = glob.glob("data/images/*.png")
+maskTrain = glob.glob("data/masks/*.png")
 
-imageTest = glob.glob("path/to/test/images/*.png")
-maskTest = glob.glob("path/to/test/masks/*.png")
+imageTest = glob.glob("data/images/*.png")
+maskTest = glob.glob("data/masks/*.png")
 
 def createDataset(imagePaths, maskPaths):
     pairs = zip(imagePaths, maskPaths)
 
-    dataset = Dataset.from_pandas(DataFrame(pairs, columns=["image", "label"]))
+    dataset = Dataset.from_pandas(DataFrame(pairs, columns=["image", "mask"]))
     dataset = dataset.cast_column("image", Image())
-    dataset = dataset.cast_column("label", Image(decode=True, id=None))
+    dataset = dataset.cast_column("mask", Image(decode=True, id=None))
 
     return dataset
 
@@ -26,4 +26,4 @@ test = createDataset(imageTest, maskTest)
 
 # Upload dataset to HuggingFace
 dataset = DatasetDict({"train": train, "test": test})
-dataset.push_to_hub("nameOfDataset")
+dataset.push_to_hub("ChristopherS27/test")

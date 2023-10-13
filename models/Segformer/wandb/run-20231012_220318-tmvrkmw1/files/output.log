@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "C:\Users\chris\OneDrive\Documents\GitHub\thermographic_inspection\models\Segformer\train.py", line 62, in <module>
+    model = SegformerForSemanticSegmentation.from_pretrained(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\chris\anaconda3\envs\Research\Lib\site-packages\transformers\modeling_utils.py", line 2542, in from_pretrained
+    config, model_kwargs = cls.config_class.from_pretrained(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\chris\anaconda3\envs\Research\Lib\site-packages\transformers\configuration_utils.py", line 598, in from_pretrained
+    return cls.from_dict(config_dict, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\chris\anaconda3\envs\Research\Lib\site-packages\transformers\configuration_utils.py", line 757, in from_dict
+    raise ValueError(
+ValueError: You passed along `num_labels=3` with an incompatible id to label map: {0: 'background', 1: 'object'}. Since those arguments are inconsistent with each other, you should remove one of them.

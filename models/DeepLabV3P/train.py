@@ -24,7 +24,7 @@ strategy = tf.distribute.MirroredStrategy()
 with strategy.scope():
     # Initialize WandB
     wandb.init(
-        project="projectName",
+        project="test",
         config={
             "batchSize": args.batchSize,
             "epochs": args.epochs,

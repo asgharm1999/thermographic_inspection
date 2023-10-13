@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "c:\Users\chris\OneDrive\Documents\GitHub\thermographic_inspection\models\Segformer\train.py", line 46, in <module>
+    train, test = load_dataset("nameOfDataset", split=["train", "test"])  # TODO: Set dataset name
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\chris\anaconda3\envs\Research\Lib\site-packages\datasets\load.py", line 2129, in load_dataset
+    builder_instance = load_dataset_builder(
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\chris\anaconda3\envs\Research\Lib\site-packages\datasets\load.py", line 1815, in load_dataset_builder
+    dataset_module = dataset_module_factory(
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\chris\anaconda3\envs\Research\Lib\site-packages\datasets\load.py", line 1508, in dataset_module_factory
+    raise FileNotFoundError(
+FileNotFoundError: Couldn't find a dataset script at C:\Users\chris\OneDrive\Documents\GitHub\thermographic_inspection\nameOfDataset\nameOfDataset.py or any data file in the same directory. Couldn't find 'nameOfDataset' on the Hugging Face Hub either: FileNotFoundError: Dataset 'nameOfDataset' doesn't exist on the Hub. If the repo is private or gated, make sure to log in with `huggingface-cli login`.
