@@ -61,7 +61,7 @@ def normalize(x):
     return ((x - min) / (max - min) * 255).astype("uint8")
 
 
-def PCT(video: np.ndarray, path: str):
+def PCT(video: np.ndarray, path: str, method: str = "PCA"):
     """
     Performs Principal Component Thermography on a video with 1 channel
 
@@ -76,45 +76,80 @@ def PCT(video: np.ndarray, path: str):
     """
 
     # Reshape video from (frames, height, width) to (height*width, frames)
-    height, width = video.shape[1], video.shape[2]
+    frames, height, width = video.shape[0], video.shape[1], video.shape[2]
 
     video = video.reshape(video.shape[0], height * width)
     video = video.T
 
-    # Perform PCA on the video
-    print("Performing PCA...")
-    pca = PCA(n_components=2)
-    principalComponents = pca.fit_transform(video)
+    if method == "PCA":
+        # Perform PCA on the video
+        print("Performing PCA...")
+        pca = PCA(n_components=2)
+        principalComponents = pca.fit_transform(video)
 
-    # Get EOFs
-    EOF1 = principalComponents[:, 0].reshape(height, width)
-    EOF2 = principalComponents[:, 1].reshape(height, width)
+        # Get EOFs
+        EOF1 = principalComponents[:, 0].reshape(height, width)
+        EOF2 = principalComponents[:, 1].reshape(height, width)
 
-    # Normalize EOFs
-    print("Normalizing results...")
-    EOF1 = normalize(EOF1)
-    EOF2 = normalize(EOF2)
+        # Normalize EOFs
+        print("Normalizing results...")
+        EOF1 = normalize(EOF1)
+        EOF2 = normalize(EOF2)
 
-    # Turn to colormap
-    EOF1 = cv2.applyColorMap(EOF1, cv2.COLORMAP_JET)
-    EOF2 = cv2.applyColorMap(EOF2, cv2.COLORMAP_JET)
+        # Turn to colormap
+        EOF1 = cv2.applyColorMap(EOF1, cv2.COLORMAP_JET)
+        EOF2 = cv2.applyColorMap(EOF2, cv2.COLORMAP_JET)
 
-    # Show EOFs as thermograms
-    cv2.imshow("EOF1", EOF1)
-    cv2.imshow("EOF2", EOF2)
+        # Show EOFs as thermograms
+        cv2.imshow("EOF1", EOF1)
+        cv2.imshow("EOF2", EOF2)
 
-    # Save EOFs as images
-    path = path.removeprefix("videos/")
-    year, month, day, distance, _, side = path.split("-")
-    newPath = f"images/{year}-{month}-{day}-{distance}-{side}"
+        # Save EOFs as images
+        path = path.removeprefix("videos/")
+        year, month, day, distance, _, side = path.split("-")
+        newPath = f"images/{year}-{month}-{day}-{distance}-{side}"
 
-    print(newPath + "_EOF1.png")
+        cv2.imwrite(newPath + "_EOF1.png", EOF1)
+        cv2.imwrite(newPath + "_EOF2.png", EOF2)
 
-    cv2.imwrite(newPath + "_EOF1.png", EOF1)
-    cv2.imwrite(newPath + "_EOF2.png", EOF2)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    elif method == "SVD":
+        # Normalize video
+        mean = np.mean(video)
+        video = video - mean
+
+        # Perform SVD on the video
+        print("Performing SVD...")
+        U, S, V = np.linalg.svd(video, full_matrices=False)
+
+        # Get EOFs
+        EOF1 = U[:, 0].reshape(height, width)
+        EOF2 = U[:, 1].reshape(height, width)
+
+        # Normalize EOFs
+        EOF1 = normalize(EOF1)
+        EOF2 = normalize(EOF2)
+
+        # Turn to colormap
+        EOF1 = cv2.applyColorMap(EOF1, cv2.COLORMAP_JET)
+        EOF2 = cv2.applyColorMap(EOF2, cv2.COLORMAP_JET)
+
+        # Show EOFs as thermograms
+        cv2.imshow("EOF1", EOF1)
+        cv2.imshow("EOF2", EOF2)
+
+        # Save EOFs as images
+        path = path.removeprefix("videos/")
+        year, month, day, distance, _, side = path.split("-")
+        newPath = f"images/{year}-{month}-{day}-{distance}-{side}"
+
+        cv2.imwrite(newPath + "_EOF1.png", EOF1)
+        cv2.imwrite(newPath + "_EOF2.png", EOF2)
+
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 
 def createMask(vid1Name, vid2Name, debug: bool = False):
@@ -153,7 +188,7 @@ def createMask(vid1Name, vid2Name, debug: bool = False):
     if not ret:
         print("Error: Cannot read video file.")
         exit()
-    
+
     # First few frames may be blank, so allow frame skipping
     while np.mean(frame) < 10:
         ret, frame = cap1.read()
@@ -171,7 +206,7 @@ def createMask(vid1Name, vid2Name, debug: bool = False):
 
     # Get the ROI for each frame
     print("Cropping videos...")
-    roiFrame = frame[y: y+h, x: x+h]
+    roiFrame = frame[y : y + h, x : x + h]
     writer1.write(roiFrame)
     while True:
         ret, frame = cap1.read()
@@ -224,38 +259,17 @@ def createMask(vid1Name, vid2Name, debug: bool = False):
     return output1Name, output2Name
 
 
-def preProcess(date: str, dist: str, debug: bool = False):
+def preProcess(beforeFile: str, afterFile: str, debug: bool = False):
     """
     Highlights defects by performing 'cold substraction' on the heated and unheated videos
 
     Parameters
     ----------
-    date : str
-        Date of the video in YYYY-MM-DD format
-    dist : str
-        Distance of the video in DD format
+    beforeFile : str
+        Path to the unheated video (without extension)
+    afterFile : str
+        Path to the heated video (without extension)
     """
-    beforeLeft = f"videos/{date}-{dist}-before-left.mp4"
-    beforeRight = f"videos/{date}-{dist}-before-right.mp4"
-    afterLeft = f"videos/{date}-{dist}-after-left.mp4"
-    afterRight = f"videos/{date}-{dist}-after-right.mp4"
-
-    beforeFile = f"videos/{date}-{dist}-before"
-    afterFile = f"videos/{date}-{dist}-after"
-
-    status = stitchVideo([beforeLeft, beforeRight], beforeFile + ".mp4")
-    if not status:
-        print("Error stitching before videos")
-        exit()
-
-    status = stitchVideo([afterLeft, afterRight], afterFile + ".mp4")
-    if not status:
-        print("Error stitching after videos")
-        exit()
-
-    # Stitch videos
-    # TODO: Stitch videos
-
     # Create Mask
     print("Creating mask...")
     afterMask, beforeMask = createMask(afterFile, beforeFile, debug)
@@ -300,9 +314,13 @@ def preProcess(date: str, dist: str, debug: bool = False):
     doPCT = input("Perform PCT on the after video? (y/n): ")
 
     if doPCT == "y":
-        PCT(afterVid, afterFile)
+        PCT(afterVid, afterFile, method="SVD")
 
 
 # Test code
 if __name__ == "__main__":
-    preProcess("2023-09-12", "10", debug=False)
+    preProcess(
+        "videos/2023-09-12-10-before-left",
+        "videos/2023-09-12-10-after-left",
+        debug=False,
+    )
