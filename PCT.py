@@ -24,7 +24,7 @@ def readVideo(path: str, channels: int = 3):
     Returns
     -------
     video : numpy array
-        Numpy array of the video file
+        3D Numpy array of the video file (frames, height, width)
     """
     # Read the video file
     vid = cv2.VideoCapture(path)
@@ -55,10 +55,20 @@ def readVideo(path: str, channels: int = 3):
 def normalize(x):
     """
     Normalize a 2D numpy array to 0-255
+
+    Parameters
+    ----------
+    x : numpy array
+        Numpy array to normalize
+
+    Returns
+    -------
+    x : numpy array
+        Normalized numpy array
     """
-    min = np.min(x)
-    max = np.max(x)
-    return ((x - min) / (max - min) * 255).astype("uint8")
+    res = np.zeros(x.shape)
+    cv2.normalize(x, res, 0, 255, cv2.NORM_MINMAX)
+    return res.astype("uint8")
 
 
 def PCT(video: np.ndarray, path: str, method: str = "PCA"):
@@ -76,7 +86,7 @@ def PCT(video: np.ndarray, path: str, method: str = "PCA"):
     """
 
     # Reshape video from (frames, height, width) to (height*width, frames)
-    frames, height, width = video.shape[0], video.shape[1], video.shape[2]
+    height, width = video.shape[1], video.shape[2]
 
     video = video.reshape(video.shape[0], height * width)
     video = video.T
@@ -116,13 +126,15 @@ def PCT(video: np.ndarray, path: str, method: str = "PCA"):
         cv2.destroyAllWindows()
 
     elif method == "SVD":
-        # Normalize video
-        mean = np.mean(video)
-        video = video - mean
+        # Standardize video
+        mean = np.mean(video, axis=0)
+        stdDev = np.std(video, axis=0)
+        epsilon = 1e-5
+        video = (video - mean) / (stdDev + epsilon)
 
         # Perform SVD on the video
         print("Performing SVD...")
-        U, S, V = np.linalg.svd(video, full_matrices=False)
+        U, _, _ = np.linalg.svd(video, full_matrices=False)
 
         # Get EOFs
         EOF1 = U[:, 0].reshape(height, width)
@@ -278,43 +290,72 @@ def preProcess(beforeFile: str, afterFile: str, debug: bool = False):
     afterVid = readVideo(afterMask)
     beforeVid = readVideo(beforeMask)
 
-    print("Performing cold subtraction...")
-    # Get the pixelwise mean across all frames
-    afterMean = np.mean(afterVid, axis=0)
+    # print("Performing cold subtraction...")
+    # # Get the pixelwise mean across all frames
+    # afterMean = np.mean(afterVid, axis=0)
+    # beforeMean = np.mean(beforeVid, axis=0)
+
+    # # Normalize the means
+    # afterNormalized = normalize(afterMean)
+    # beforeNormalized = normalize(beforeMean)
+
+    # # Get the difference between the heated and unheated means
+    # diff = afterNormalized - beforeNormalized
+
+    # # Show the results
+
+    # copyAfter = afterNormalized.copy()
+    # copyBefore = beforeNormalized.copy()
+
+    # cv2.applyColorMap(copyAfter, cv2.COLORMAP_JET)
+    # cv2.applyColorMap(copyBefore, cv2.COLORMAP_JET)
+    # cv2.applyColorMap(diff, cv2.COLORMAP_JET)
+
+    # cv2.imshow("After (Mean + Normalized)", copyAfter)
+    # cv2.imshow("Before (Mean + Normalized)", copyBefore)
+    # cv2.imshow("Difference", diff)
+
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+    # # cv2.imwrite(afterFile + "_processed.png", copyAfter)
+    # # cv2.imwrite(beforeFile + "_processed.png", copyBefore)
+    # # cv2.imwrite(afterFile + "_diff.png", diff)
+
+    # # Perform PCT on the after video if wanted
+    # doPCT = input("Perform PCT on the after video? (y/n): ")
+
+    # if doPCT == "y":
+    #     PCT(afterVid, afterFile, method="SVD")
+
+    # Get pixelwise mean of cold video
+    print("Getting pixelwise mean of cold video...")
     beforeMean = np.mean(beforeVid, axis=0)
 
-    # Normalize the means
-    afterNormalized = normalize(afterMean)
+    # Normalize cold frame
+    print("Normalizing cold frame...")
     beforeNormalized = normalize(beforeMean)
-
-    # Get the difference between the heated and unheated means
-    diff = afterNormalized - beforeNormalized
-
-    # Show the results
-
-    copyAfter = afterNormalized.copy()
-    copyBefore = beforeNormalized.copy()
-
-    cv2.applyColorMap(copyAfter, cv2.COLORMAP_JET)
-    cv2.applyColorMap(copyBefore, cv2.COLORMAP_JET)
-    cv2.applyColorMap(diff, cv2.COLORMAP_JET)
-
-    cv2.imshow("After (Mean + Normalized)", copyAfter)
-    cv2.imshow("Before (Mean + Normalized)", copyBefore)
-    cv2.imshow("Difference", diff)
-
+    cv2.imshow("Before (Mean + Normalized)", beforeNormalized)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-    # cv2.imwrite(afterFile + "_processed.png", copyAfter)
-    # cv2.imwrite(beforeFile + "_processed.png", copyBefore)
-    # cv2.imwrite(afterFile + "_diff.png", diff)
+    # Normalize all frames in hot video
+    print("Normalizing hot video...")
+    for i in range(afterVid.shape[0]):
+        afterVid[i] = normalize(afterVid[i])
+        cv2.imshow("After (Mean + Normalized)", afterVid[i])
+    
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
-    # Perform PCT on the after video if wanted
-    doPCT = input("Perform PCT on the after video? (y/n): ")
+    # Subtract cold frame from all hot frames
+    print("Subtracting cold frame from hot video...")
+    for i in range(afterVid.shape[0]):
+        afterVid[i] = normalize(afterVid[i] - beforeNormalized)
 
-    if doPCT == "y":
-        PCT(afterVid, afterFile, method="SVD")
+    # Perform PCT on the hot video
+    print("Performing PCT on hot video...")
+    PCT(afterVid, afterFile, method="SVD")
 
 
 # Test code
