@@ -3,7 +3,7 @@ from scipy.fft import fft
 import cv2
 
 
-def PPIT(video):
+def PPT(video):
     """
     Takes in a video as a 3D numpy array, and performs Pulsed Phase Infrared
     Thermography post-processing on it. Returns a 2D numpy array of the phase 

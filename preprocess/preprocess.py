@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 from PCT import PCT
-from PPIT import PPIT
+from PPT import PPT
 
 
 def normalize(x: np.ndarray):
@@ -181,10 +181,10 @@ def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
 
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-    elif method == "PPIT":
+    elif method == "PPT":
         # Perform PPIT
-        print("Performing PPIT...")
-        phaseImage = PPIT(hot)
+        print("Performing PPT...")
+        phaseImage = PPT(hot)
 
         # Save phase image
         print("Saving phase image...")
@@ -205,5 +205,5 @@ if __name__ == "__main__":
         "videos/2023-09-12-15-before-left-straight.mp4",
         "videos/2023-09-12-15-after-left-straight.mp4",
         "images/2023-09-12-15-left-straight",
-        method="PPIT",
+        method="PPT",
     )
