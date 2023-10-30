@@ -359,7 +359,7 @@ def preProcess(beforeFile: str, afterFile: str, debug: bool = False):
 # Test code
 if __name__ == "__main__":
     preProcess(
-        "videos/2023-10-30-10-before-left-angled",
-        "videos/2023-10-30-10-after-left-angled",
+        "videos/2023-10-30-5-before-left-straight",
+        "videos/2023-10-30-5-after-left-straight",
         debug=False,
     )

@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from PCT import PCT
+from PPIT import PPIT
 
 
 def normalize(x: np.ndarray):
@@ -140,7 +141,7 @@ def createMask(path1: str, path2: str):
     return newPath1, newPath2
 
 
-def preprocess(coldPath: str, hotPath: str, savePath: str):
+def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
     """
     Preprocesses videos for PCT
 
@@ -161,29 +162,48 @@ def preprocess(coldPath: str, hotPath: str, savePath: str):
     print("Reading masked videos...")
     cold, hot = readVideo(coldMask), readVideo(hotMask)
 
-    # Perform PCT
-    print("Performing PCT...")
-    EOF1, EOF2 = PCT(hot)
+    if method == "PCT":
+        # Perform PCT
+        print("Performing PCT...")
+        EOF1, EOF2 = PCT(hot)
 
-    # Save EOFs
-    print("Saving EOFs...")
-    EOF1, EOF2 = normalize(EOF1), normalize(EOF2)
-    EOF1 = cv2.applyColorMap(EOF1, cv2.COLORMAP_JET)
-    EOF2 = cv2.applyColorMap(EOF2, cv2.COLORMAP_JET)
+        # Save EOFs
+        print("Saving EOFs...")
+        EOF1, EOF2 = normalize(EOF1), normalize(EOF2)
+        EOF1 = cv2.applyColorMap(EOF1, cv2.COLORMAP_JET)
+        EOF2 = cv2.applyColorMap(EOF2, cv2.COLORMAP_JET)
 
-    cv2.imshow("EOF1", EOF1)
-    cv2.imshow("EOF2", EOF2)
+        cv2.imshow("EOF1", EOF1)
+        cv2.imshow("EOF2", EOF2)
 
-    cv2.imwrite(savePath + "_EOF1.png", EOF1)
-    cv2.imwrite(savePath + "_EOF2.png", EOF2)
+        cv2.imwrite(savePath + "_EOF1.png", EOF1)
+        cv2.imwrite(savePath + "_EOF2.png", EOF2)
 
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    elif method == "PPIT":
+        # Perform PPIT
+        print("Performing PPIT...")
+        phaseImage = PPIT(hot)
+
+        # Save phase image
+        print("Saving phase image...")
+        phaseImage = normalize(phaseImage)
+        phaseImage = cv2.applyColorMap(phaseImage, cv2.COLORMAP_JET)
+
+        cv2.imshow("Phase Image", phaseImage)
+
+        cv2.imwrite(savePath + "_phaseImage.png", phaseImage)
+
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
 
 
 if __name__ == "__main__":
     preprocess(
-        "videos/2023-10-30-10-before-left-angled.mp4",
-        "videos/2023-10-30-10-after-left-angled.mp4",
-        "images/2023-10-30-10-left-angled",
+        "videos/2023-09-12-15-before-left-straight.mp4",
+        "videos/2023-09-12-15-after-left-straight.mp4",
+        "images/2023-09-12-15-left-straight",
+        method="PPIT",
     )
