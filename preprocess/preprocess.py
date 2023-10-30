@@ -24,39 +24,30 @@ def normalize(x: np.ndarray):
 
 def readVideo(path: str):
     """
-    Takes in path to video, and returns a 3D numpy array of shape (frames,
-    height, width) and dtype np.float32
+    Reads a video file and converts it to a numpy array
 
     Parameters
     ----------
     path : str
-        Path to video
+        Path to the video file
 
     Returns
     -------
-    res : np.ndarray
-        Video as a 3D numpy array of shape (frames, height, width) and dtype np.float32
+    video : numpy array
+        3D Numpy array of the video file (frames, height, width)
     """
+    # Read the video file
     vid = cv2.VideoCapture(path)
-    frames = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
-    width = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    res, ret = [], True
 
-    res = np.zeros((frames, height, width), dtype=np.float32)
-    i = 0
-
-    while True:
-        ret, frame = vid.read()
-        if not ret:
-            break
-
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        res[i] = frame
-        i += 1
+    while ret:
+        ret, img = vid.read()
+        if ret:
+            res.append(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
 
     vid.release()
-    return res
+
+    return np.stack(res, axis=0)
 
 
 def createMask(path1: str, path2: str):
@@ -191,4 +182,8 @@ def preprocess(coldPath: str, hotPath: str, savePath: str):
 
 
 if __name__ == "__main__":
-    preprocess("videos/2023-10-30-10-before-left-angled.mp4", "videos/2023-10-30-10-after-left-angled.mp4", "images/2023-10-30-10-left-angled")
+    preprocess(
+        "videos/2023-10-30-10-before-left-angled.mp4",
+        "videos/2023-10-30-10-after-left-angled.mp4",
+        "images/2023-10-30-10-left-angled",
+    )
