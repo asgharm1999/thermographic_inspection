@@ -2,25 +2,7 @@ import numpy as np
 import cv2
 from PCT import PCT
 from PPT import PPT
-
-
-def normalize(x: np.ndarray):
-    """
-    Normalizes a 2D array to values between 0 and 255
-
-    Parameters
-    ----------
-    x : np.ndarray
-        2D array to normalize
-
-    Returns
-    -------
-    res : np.ndarray
-        Normalized 2D array
-    """
-    res = np.zeros(x.shape)
-    cv2.normalize(x, res, 0, 255, cv2.NORM_MINMAX)
-    return res.astype("uint8")
+from display import display
 
 
 def readVideo(path: str):
@@ -167,37 +149,27 @@ def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
         print("Performing PCT...")
         EOF1, EOF2 = PCT(hot)
 
+        # Display EOFs
+        print("Displaying EOFs...")
+        display([EOF1, EOF2], ["EOF1", "EOF2"], savePath)
+
         # Save EOFs
         print("Saving EOFs...")
-        EOF1, EOF2 = normalize(EOF1), normalize(EOF2)
-        EOF1 = cv2.applyColorMap(EOF1, cv2.COLORMAP_JET)
-        EOF2 = cv2.applyColorMap(EOF2, cv2.COLORMAP_JET)
+        np.save(savePath + "-EOF1.npy", EOF1)
+        np.save(savePath + "-EOF2.npy", EOF2)
 
-        cv2.imshow("EOF1", EOF1)
-        cv2.imshow("EOF2", EOF2)
-
-        cv2.imwrite(savePath + "_EOF1.png", EOF1)
-        cv2.imwrite(savePath + "_EOF2.png", EOF2)
-
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
     elif method == "PPT":
         # Perform PPIT
         print("Performing PPT...")
         phaseImage = PPT(hot)
 
+        # Display phase image
+        print("Displaying phase image...")
+        display([phaseImage], ["Phase Image"], savePath)
+
         # Save phase image
         print("Saving phase image...")
-        phaseImage = normalize(phaseImage)
-        phaseImage = cv2.applyColorMap(phaseImage, cv2.COLORMAP_JET)
-
-        cv2.imshow("Phase Image", phaseImage)
-
-        cv2.imwrite(savePath + "_phaseImage.png", phaseImage)
-
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
+        np.save(savePath + "-phaseImage.npy", phaseImage)
 
 
 if __name__ == "__main__":
@@ -205,5 +177,5 @@ if __name__ == "__main__":
         "videos/2023-09-12-15-before-left-straight.mp4",
         "videos/2023-09-12-15-after-left-straight.mp4",
         "images/2023-09-12-15-left-straight",
-        method="PPT",
+        method="PCT",
     )
