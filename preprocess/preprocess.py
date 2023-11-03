@@ -147,16 +147,16 @@ def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
     if method == "PCT":
         # Perform PCT
         print("Performing PCT...")
-        EOF1, EOF2 = PCT(hot)
+        EOFs = PCT(hot, norm_method="mean reduction", EOFs=6)
 
         # Display EOFs
         print("Displaying EOFs...")
-        display([EOF1, EOF2], ["EOF1", "EOF2"], savePath)
+        display(EOFs, [f"EOF{i}" for i in range(6)], savePath)
 
         # Save EOFs
         print("Saving EOFs...")
-        np.save(savePath + "-EOF1.npy", EOF1)
-        np.save(savePath + "-EOF2.npy", EOF2)
+        for i, EOF in enumerate(EOFs):
+            np.save(savePath + f"-EOF{i}", EOF)
 
     elif method == "PPT":
         # Perform PPIT
@@ -174,8 +174,8 @@ def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
 
 if __name__ == "__main__":
     preprocess(
-        "videos/2023-09-12-15-before-left-straight.mp4",
-        "videos/2023-09-12-15-after-left-straight.mp4",
-        "images/2023-09-12-15-left-straight",
+        "videos/2023-10-30-5-before-left-straight.mp4",
+        "videos/2023-10-30-5-after-left-straight.mp4",
+        "images/2023-10-30-5-left-straight",
         method="PCT",
     )

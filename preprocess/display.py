@@ -40,14 +40,19 @@ def display(arrays: list[np.ndarray], names: list[str], title: str):
     -------
     None
     """
-    fig, axes = plt.subplots(len(arrays), 1)
+    rows = len(arrays) // 2
+    cols = 2
+    fig, axes = plt.subplots(rows, cols)
     fig.suptitle(title)
 
     images = []
     for i, arr in enumerate(arrays):
-        images.append(axes[i].imshow(normalize(arr), cmap="jet"))
-        axes[i].label_outer()
-        axes[i].set_title(names[i])
+        row = i // cols
+        col = i % cols
+
+        images.append(axes[row, col].imshow(normalize(arr), cmap="jet"))
+        axes[row, col].label_outer()
+        axes[row, col].set_title(names[i])
 
     fig.colorbar(images[0], ax=axes, orientation="horizontal", fraction=0.1)
 
