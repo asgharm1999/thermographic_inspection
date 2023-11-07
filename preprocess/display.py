@@ -40,23 +40,30 @@ def display(arrays: list[np.ndarray], names: list[str], title: str):
     -------
     None
     """
-    rows = len(arrays) // 2
-    cols = 2
-    fig, axes = plt.subplots(rows, cols)
-    fig.suptitle(title)
+    if len(arrays) >= 2:
+        rows = len(arrays) // 2
+        cols = 2
+        fig, axes = plt.subplots(rows, cols)
+        fig.suptitle(title)
 
-    images = []
-    for i, arr in enumerate(arrays):
-        row = i // cols
-        col = i % cols
+        images = []
+        for i, arr in enumerate(arrays):
+            row = i // cols
+            col = i % cols
 
-        images.append(axes[row, col].imshow(normalize(arr), cmap="jet"))
-        axes[row, col].label_outer()
-        axes[row, col].set_title(names[i])
+            images.append(axes[row, col].imshow(normalize(arr), cmap="jet"))
+            axes[row, col].label_outer()
+            axes[row, col].set_title(names[i])
 
-    fig.colorbar(images[0], ax=axes, orientation="horizontal", fraction=0.1)
+        fig.colorbar(images[0], ax=axes, orientation="horizontal", fraction=0.1)
 
-    plt.show()
+        plt.show()
+    else:
+        # Display single image
+        plt.imshow(arrays[0], cmap="jet")
+        plt.title(title)
+        plt.colorbar()
+        plt.show()
 
 
 if __name__ == "__main__":

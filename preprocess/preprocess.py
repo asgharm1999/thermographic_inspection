@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from PCT import PCT
+from PCT import PCT, SPCT, ESPCT
 from PPT import PPT
 from display import display
 
@@ -145,6 +145,9 @@ def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
     cold, hot = readVideo(coldMask), readVideo(hotMask)
 
     if method == "PCT":
+        # Other stuff
+        
+
         # Perform PCT
         print("Performing PCT...")
         EOFs = PCT(hot, norm_method="mean reduction", EOFs=6)
@@ -157,6 +160,34 @@ def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
         print("Saving EOFs...")
         for i, EOF in enumerate(EOFs):
             np.save(savePath + f"-EOF{i}", EOF)
+    
+    elif method == "SPCT":
+        # Perform SPCT
+        print("Performing SPCT...")
+        EOFs = SPCT(hot, EOFs=6)
+
+        # Display EOFs
+        print("Displaying EOFs...")
+        display(EOFs, [f"EOF{i}" for i in range(6)], savePath)
+
+        # Save EOFs
+        print("Saving EOFs...")
+        for i, EOF in enumerate(EOFs):
+            np.save(savePath + f"-SPCT-EOF{i}", EOF)
+
+    elif method == "ESPCT":
+        # Perform ESPCT
+        print("Performing ESPCT...")
+        EOFs = ESPCT(hot, k=8, EOFs=6)
+
+        # Display EOFs
+        print("Displaying EOFs...")
+        display(EOFs, [f"EOF{i}" for i in range(6)], savePath)
+
+        # Save EOFs
+        print("Saving EOFs...")
+        for i, EOF in enumerate(EOFs):
+            np.save(savePath + f"-ESPCT-EOF{i}", EOF)
 
     elif method == "PPT":
         # Perform PPIT
@@ -174,8 +205,8 @@ def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
 
 if __name__ == "__main__":
     preprocess(
-        "videos/2023-10-30-5-before-left-straight.mp4",
-        "videos/2023-10-30-5-after-left-straight.mp4",
-        "images/2023-10-30-5-left-straight",
-        method="PCT",
+        "videos/2023-09-12-15-before-left-straight.mp4",
+        "videos/2023-09-12-15-after-left-straight.mp4",
+        "images/2023-09-12-15-left-straight",
+        method="SPCT",
     )
