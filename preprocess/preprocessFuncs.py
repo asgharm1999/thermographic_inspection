@@ -135,6 +135,10 @@ def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
         Path to hot video
     savePath : str
         Path to save EOFs
+
+    Returns
+    -------
+    Path to saved figure
     """
     # Create masked videos
     print("Creating mask...")
@@ -154,12 +158,14 @@ def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
 
         # Display EOFs
         print("Displaying EOFs...")
-        display(EOFs, [f"EOF{i}" for i in range(6)], savePath)
+        res = display(EOFs, [f"EOF{i}" for i in range(6)], savePath)
 
         # Save EOFs
         print("Saving EOFs...")
         for i, EOF in enumerate(EOFs):
             np.save(savePath + f"-EOF{i}", EOF)
+        
+        return res
     
     elif method == "SPCT":
         # Perform SPCT
@@ -168,12 +174,14 @@ def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
 
         # Display EOFs
         print("Displaying EOFs...")
-        display(EOFs, [f"EOF{i}" for i in range(6)], savePath)
+        res = display(EOFs, [f"EOF{i}" for i in range(6)], savePath)
 
         # Save EOFs
         print("Saving EOFs...")
         for i, EOF in enumerate(EOFs):
             np.save(savePath + f"-SPCT-EOF{i}", EOF)
+
+        return res
 
     elif method == "ESPCT":
         # Perform ESPCT
@@ -182,12 +190,14 @@ def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
 
         # Display EOFs
         print("Displaying EOFs...")
-        display(EOFs, [f"EOF{i}" for i in range(6)], savePath)
+        res = display(EOFs, [f"EOF{i}" for i in range(6)], savePath)
 
         # Save EOFs
         print("Saving EOFs...")
         for i, EOF in enumerate(EOFs):
             np.save(savePath + f"-ESPCT-EOF{i}", EOF)
+        
+        return res
 
     elif method == "PPT":
         # Perform PPIT
@@ -196,11 +206,16 @@ def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
 
         # Display phase image
         print("Displaying phase image...")
-        display([phaseImage], ["Phase Image"], savePath)
+        res = display([phaseImage], ["Phase Image"], savePath)
 
         # Save phase image
         print("Saving phase image...")
         np.save(savePath + "-phaseImage.npy", phaseImage)
+
+        return res
+    
+    else:
+        raise Exception("Invalid method")
 
 
 if __name__ == "__main__":
@@ -208,5 +223,5 @@ if __name__ == "__main__":
         "videos/2023-09-12-15-before-left-straight.mp4",
         "videos/2023-09-12-15-after-left-straight.mp4",
         "images/2023-09-12-15-left-straight",
-        method="SPCT",
+        method="PCT",
     )
