@@ -82,9 +82,24 @@ def createMask(path1: str, path2: str):
         else:
             break
 
-    # Create window to display frame and select ROI
-    cv2.namedWindow("Select ROI")
-    x, y, w, h = cv2.selectROI("Select ROI", frame1)
+    # Create window to display frame and select RoI. If user presses 's', skip
+    # to next frame.
+    while True:
+        cv2.imshow("Press 's' to skip frame, 'c' to select RoI", frame1)
+        key = cv2.waitKey(0) & 0xFF
+        if key == ord("s"):
+            cv2.destroyAllWindows()
+
+            ret, frame1 = cap1.read()
+            if not ret:
+                raise Exception("Cannot read video 1")
+
+            continue
+        elif key == ord("c"):
+            break
+    
+    # Select RoI
+    x, y, w, h = cv2.selectROI("Select RoI", frame1)
 
     # Create masked videos
     writer1 = cv2.VideoWriter(newPath1, fourcc, fps, (w, h))

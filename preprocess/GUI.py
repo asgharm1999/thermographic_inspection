@@ -26,6 +26,20 @@ def preprocessWrapper():
     savePath = savePathEntry.get()
     method = methodChosen.get()
 
+    if not coldPath:
+        # Display error message in window
+        coldPathLabel.config(text="No cold video path selected")
+        return
+    if not hotPath:
+        hotPathLabel.config(text="No hot video path selected")
+        return
+    if not savePath:
+        savePathLabel.config(text="No save path selected")
+        return
+    if not method:
+        methodLabel.config(text="No method selected")
+        return
+
     figurePath = preprocess(coldPath, hotPath, savePath, method=method)
     image = Image.open(figurePath)
     photo = ImageTk.PhotoImage(image)
@@ -62,6 +76,7 @@ methodLabel.pack()
 methodChosen = tk.StringVar()
 methodOptions = ["PCT", "SPCT", "PPT"]
 methodDropdown = tk.OptionMenu(window, methodChosen, *methodOptions)
+methodDropdown.pack()
 
 imageLabel = tk.Label(window, text="Result will be displayed below")
 imageLabel.pack()
