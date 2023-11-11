@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 
 
-def readVideo(path: str, channels: int = 3):
+def readVideo(path, channels = 3):
     """
     Reads a video file and converts it to a numpy array
 
@@ -69,7 +69,7 @@ def normalize(x):
     return res.astype("uint8")
 
 
-def PCT(video: np.ndarray, path: str, method: str = "PCA"):
+def PCT(video, path, method = "PCA"):
     """
     Performs Principal Component Thermography on a video with 1 channel
 
@@ -162,7 +162,7 @@ def PCT(video: np.ndarray, path: str, method: str = "PCA"):
         cv2.destroyAllWindows()
 
 
-def createMask(vid1Name, vid2Name, debug: bool = False):
+def createMask(vid1Name, vid2Name, debug = False):
     """
     Creates a mask for the videos by selecting a region of interest (ROI), cropping
      the video to that region, and saving the cropped video.
@@ -269,7 +269,7 @@ def createMask(vid1Name, vid2Name, debug: bool = False):
     return output1Name, output2Name
 
 
-def preProcess(beforeFile: str, afterFile: str, debug: bool = False):
+def preProcess(beforeFile, afterFile, debug = False):
     """
     Highlights defects by performing 'cold substraction' on the heated and unheated videos
 

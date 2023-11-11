@@ -5,7 +5,7 @@ from PPT import PPT
 from display import display
 
 
-def readVideo(path: str):
+def readVideo(path):
     """
     Reads a video file and converts it to a numpy array
 
@@ -33,7 +33,7 @@ def readVideo(path: str):
     return np.stack(res, axis=0)
 
 
-def createMask(path1: str, path2: str):
+def createMask(path1, path2):
     """
     Takes in two paths to videos, and creates masked videos of the same size.
     Assumes RoI is the same for both videos.
@@ -138,7 +138,7 @@ def createMask(path1: str, path2: str):
     return newPath1, newPath2
 
 
-def preprocess(coldPath: str, hotPath: str, savePath: str, method: str = "PCT"):
+def preprocess(coldPath, hotPath, savePath, method = "PCT"):
     """
     Preprocesses videos for PCT
 

@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import SparsePCA
 
 
-def PCT(video: np.ndarray, norm_method: str = "col-wise standardize", EOFs: int = 2):
+def PCT(video, norm_method = "col-wise standardize", EOFs = 2):
     """
     Performs Principal Component Thermography (PCT) on a video
 
@@ -104,7 +104,7 @@ def ESPCT_single_iter(X, k, max_iter=1000, tol=1e-4):
     return p, v
 
 
-def ESPCT(video, k, EOFs: int = 2):
+def ESPCT(video, k, EOFs = 2):
     """
     Performs Edge-group Sparse Principal Component Thermography (ESPCT) on a video
 
