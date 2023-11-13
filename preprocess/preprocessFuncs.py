@@ -3,23 +3,17 @@ import cv2
 from PCT import PCT, SPCT, ESPCT
 from PPT import PPT
 from display import display
-
+import os
 
 def readVideo(path):
-    """
-    Reads a video file and converts it to a numpy array
+    """Reads a video file and returns a numpy array of the frames.
 
-    Parameters
-    ----------
-    path : str
-        Path to the video file
+    Args:
+        path (str): Path to video file
 
-    Returns
-    -------
-    video : numpy array
-        3D Numpy array of the video file (frames, height, width)
+    Returns:
+        np.ndarray: Numpy array of frames
     """
-    # Read the video file
     vid = cv2.VideoCapture(path)
     res, ret = [], True
 
@@ -34,23 +28,18 @@ def readVideo(path):
 
 
 def createMask(path1, path2):
-    """
-    Takes in two paths to videos, and creates masked videos of the same size.
-    Assumes RoI is the same for both videos.
+    """Takes two videos and creates a mask for each video with the same RoI.
 
-    Parameters
-    ----------
-    path1 : str
-        Path to first video
-    path2 : str
-        Path to second video
+    Args:
+        path1 (str): Path to first video
+        path2 (str): Path to second video
 
-    Returns
-    -------
-    path1Masked : str
-        Path to first masked video
-    path2Masked : str
-        Path to second masked video
+    Raises:
+        Exception: Cannot read video 1
+        Exception: Cannot read video 2
+
+    Returns:
+        (str, str): Paths to masked videos
     """
     # Define variables
     cap1 = cv2.VideoCapture(path1)
@@ -58,7 +47,7 @@ def createMask(path1, path2):
     fps = cap1.get(cv2.CAP_PROP_FPS)
     newPath1 = path1.replace(".mp4", "_masked.mp4")
     newPath2 = path2.replace(".mp4", "_masked.mp4")
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # type: ignore
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
     # Read videos, and skip frames that are blank
     print("Reading videos...")
@@ -67,7 +56,7 @@ def createMask(path1, path2):
         if not ret:
             raise Exception("Cannot read video 1")
 
-        if np.mean(frame1) < 1:  # type: ignore
+        if np.mean(frame1) < 1:
             continue
         else:
             break
@@ -77,7 +66,7 @@ def createMask(path1, path2):
         if not ret:
             raise Exception("Cannot read video 2")
 
-        if np.mean(frame2) < 1:  # type: ignore
+        if np.mean(frame2) < 1:
             continue
         else:
             break
@@ -97,7 +86,7 @@ def createMask(path1, path2):
             continue
         elif key == ord("c"):
             break
-    
+
     # Select RoI
     x, y, w, h = cv2.selectROI("Select RoI", frame1)
 
@@ -138,22 +127,21 @@ def createMask(path1, path2):
     return newPath1, newPath2
 
 
-def preprocess(coldPath, hotPath, savePath, method = "PCT"):
-    """
-    Preprocesses videos for PCT
+def preprocess(coldPath, hotPath, savePath, method="PCT", **kwargs):
+    """Preprocesses two videos and saves the results.
 
-    Parameters
-    ----------
-    coldPath : str
-        Path to cold video
-    hotPath : str
-        Path to hot video
-    savePath : str
-        Path to save EOFs
+    Args:
+        coldPath (str): Path to cold video
+        hotPath (str): Path to hot video
+        savePath (str): Path to save results, excluding file extension
+        method (str, optional): The preprocessing method to use. Defaults to "PCT".
+        **kwargs: Keyword arguments for preprocessing methods
 
-    Returns
-    -------
-    Path to saved figure
+    Raises:
+        Exception: Invalid method
+
+    Returns:
+        str: Path to figure
     """
     # Create masked videos
     print("Creating mask...")
@@ -163,55 +151,62 @@ def preprocess(coldPath, hotPath, savePath, method = "PCT"):
     print("Reading masked videos...")
     cold, hot = readVideo(coldMask), readVideo(hotMask)
 
-    if method == "PCT":
-        # Other stuff
-        
+    # Create the folder to save results
+    print("Creating folder to save results...")
+    try:
+        os.mkdir(savePath)
+    except FileExistsError:
+        pass
 
+    if method == "PCT":
         # Perform PCT
         print("Performing PCT...")
-        EOFs = PCT(hot, norm_method="mean reduction", EOFs=6)
+        numEOFs = kwargs.get("numEOFs", 6)
+        EOFs = PCT(hot, norm_method="mean reduction", EOFs=numEOFs)
 
         # Display EOFs
         print("Displaying EOFs...")
-        res = display(EOFs, [f"EOF{i}" for i in range(6)], savePath)
+        res = display(EOFs, [f"EOF{i}" for i in range(numEOFs)], savePath)
 
         # Save EOFs
         print("Saving EOFs...")
         for i, EOF in enumerate(EOFs):
-            np.save(savePath + f"-EOF{i}", EOF)
-        
+            np.save(savePath + f"EOF{i}.npy", EOF)
+
         return res
-    
+
     elif method == "SPCT":
         # Perform SPCT
         print("Performing SPCT...")
-        EOFs = SPCT(hot, EOFs=6)
+        numEOFs = kwargs.get("numEOFs", 6)
+        EOFs = SPCT(hot, EOFs=numEOFs)
 
         # Display EOFs
         print("Displaying EOFs...")
-        res = display(EOFs, [f"EOF{i}" for i in range(6)], savePath)
+        res = display(EOFs, [f"EOF{i}" for i in range(numEOFs)], savePath)
 
         # Save EOFs
         print("Saving EOFs...")
         for i, EOF in enumerate(EOFs):
-            np.save(savePath + f"-SPCT-EOF{i}", EOF)
+            np.save(savePath + f"SPCT-EOF{i}.npy", EOF)
 
         return res
 
     elif method == "ESPCT":
         # Perform ESPCT
         print("Performing ESPCT...")
-        EOFs = ESPCT(hot, k=8, EOFs=6)
+        numEOFs = kwargs.get("numEOFs", 6)
+        EOFs = ESPCT(hot, k=8, EOFs=numEOFs)
 
         # Display EOFs
         print("Displaying EOFs...")
-        res = display(EOFs, [f"EOF{i}" for i in range(6)], savePath)
+        res = display(EOFs, [f"EOF{i}" for i in range(numEOFs)], savePath)
 
         # Save EOFs
         print("Saving EOFs...")
         for i, EOF in enumerate(EOFs):
-            np.save(savePath + f"-ESPCT-EOF{i}", EOF)
-        
+            np.save(savePath + f"ESPCT-EOF{i}.npy", EOF)
+
         return res
 
     elif method == "PPT":
@@ -225,18 +220,18 @@ def preprocess(coldPath, hotPath, savePath, method = "PCT"):
 
         # Save phase image
         print("Saving phase image...")
-        np.save(savePath + "-phaseImage.npy", phaseImage)
+        np.save(savePath + "phaseImage.npy", phaseImage)
 
         return res
-    
+
     else:
         raise Exception("Invalid method")
 
 
 if __name__ == "__main__":
     preprocess(
-        "videos/2023-09-12-15-before-left-straight.mp4",
-        "videos/2023-09-12-15-after-left-straight.mp4",
-        "images/2023-09-12-15-left-straight",
+        "videos/2023-11-10-60-before-left-straight.mp4",
+        "videos/2023-11-10-60-after-left-straight.mp4",
+        "images/2023-11-10-60-left-straight/",
         method="PCT",
     )

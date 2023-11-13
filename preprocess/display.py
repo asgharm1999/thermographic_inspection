@@ -1,9 +1,6 @@
 import matplotlib.pyplot as plt
-from matplotlib import colors
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import cv2
-import tkinter as tk
 
 
 def normalize(x: np.ndarray):
@@ -59,13 +56,13 @@ def display(arrays: list[np.ndarray], names: list[str], title: str):
 
         fig.colorbar(images[0], ax=axes, orientation="horizontal", fraction=0.1)
 
-        plt.savefig(title + "-plot.png")
-        return title + "-plot.png"
+        plt.savefig(title + "plot.png")
+        return title + "plot.png"
     else:
         # Display single image
         plt.imshow(arrays[0], cmap="jet")
         plt.title(title)
         plt.colorbar()
 
-        plt.savefig(title + "-plot.png")
-        return title + "-plot.png"
+        plt.savefig(title + "plot.png")
+        return title + "plot.png"
