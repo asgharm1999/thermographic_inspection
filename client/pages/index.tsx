@@ -1,17 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import FileUpload from "@/components/FileUpload";
 
 function home() {
-  const [data, setData] = useState(
-    "If you see this the message is not loaded yet"
-  );
-
-  useEffect(() => {
-    fetch("http://localhost:8080/api/home")
-      .then((response) => response.json())
-      .then((data) => setData(data.message));
-  }, []);
-
-  return <div>{data}</div>;
+  return (
+    <div>
+      <h1>Home</h1>
+      <FileUpload />
+    </div>
+  )
 }
 
 export default home;
