@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styles from "./FileUpload.module.css";
 
-const FileUpload = () => {
+const FileUpload = ({ type }: { type: string }) => {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<
     "idle" | "uploading" | "success" | "fail"
@@ -19,6 +19,7 @@ const FileUpload = () => {
 
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("type", type)
 
       try {
         const result = await fetch("http://localhost:8080/upload", {
@@ -40,21 +41,14 @@ const FileUpload = () => {
   return (
     <>
       <div>
-        <label htmlFor="file" className="sr-only">
-          Choose a file
-        </label>
-        <input id="file" type="file" onChange={handleFileChange} className={styles.input} />
+        <h1 className={styles.label}>Upload {type} video</h1>
+        <input
+          id="file"
+          type="file"
+          onChange={handleFileChange}
+          className={styles.input}
+        />
       </div>
-      {file && (
-        <section>
-          <h2>File details:</h2>
-          <ul>
-            <li>Name: {file.name}</li>
-            <li>Type: {file.type}</li>
-            <li>Size: {file.size} bytes</li>
-          </ul>
-        </section>
-      )}
       {file && (
         <button onClick={handleUpload} className={styles.button}>
           Upload
