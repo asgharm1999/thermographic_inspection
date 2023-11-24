@@ -18,7 +18,7 @@ hotPath = None
 
 
 @app.route("/upload", methods=["POST", "GET"])
-def processFile():
+def uploadFile():
     if "file" not in request.files:
         return jsonify({"message": "No file uploaded"})
 
@@ -44,6 +44,17 @@ def processFile():
     return jsonify({"message": "File uploaded"})
 
 
+@app.route("/preprocess", methods=["POST", "GET"])
+def preprocessVideo():
+    if coldPath is None:
+        return jsonify({"message": "Cold video not uploaded"})
+    elif hotPath is None:
+        return jsonify({"message": "Hot video not uploaded"})
+    
+    resultPath = preprocess(coldPath, hotPath, "client/public/", method="PCT")
+    resultPath = resultPath.removeprefix("client/public/")
+
+    return jsonify({"message": "Video preprocessed", "resultPath": resultPath})
 
 
 if __name__ == "__main__":
