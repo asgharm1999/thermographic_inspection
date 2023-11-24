@@ -49,8 +49,11 @@ def preprocessVideo():
     elif hotPath is None:
         return jsonify({"message": "Hot video not uploaded"})
     
+    # Get the method
+    method = request.form["method"]
+    
     # Preprocess the videos
-    resultPath = preprocess(coldPath, hotPath, "client/public/", method="PCT")
+    resultPath = preprocess(coldPath, hotPath, "client/public/", method=method)
     resultPath = resultPath.removeprefix("client/public/")
 
     return jsonify({"message": "Video preprocessed", "resultPath": resultPath})
