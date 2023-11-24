@@ -39,7 +39,7 @@ const FileUpload = ({ type }: { type: string }) => {
   };
 
   return (
-    <>
+    <div className={styles.container}>
       <div>
         <h1 className={styles.label}>Upload {type} video</h1>
         <input
@@ -56,7 +56,7 @@ const FileUpload = ({ type }: { type: string }) => {
       )}
 
       <ResultIndicator status={status} />
-    </>
+    </div>
   );
 };
 

@@ -6,14 +6,14 @@ function home() {
   const [resPath, setResPath] = useState<string>("");
 
   return (
-    <div>
-      <h1>Home</h1>
+    <div className="container">
+      <h1 className="header">Home</h1>
       <div style={{ flexDirection: "row" }}>
         <FileUpload type="cold" />
         <FileUpload type="hot" />
         <ProcessButton setResultPath={setResPath} />
       </div>
-      {resPath && <img src={resPath} alt="Result Image" />}
+      {resPath && <img src={resPath} alt="Result Image" className="image" />}
     </div>
   );
 }

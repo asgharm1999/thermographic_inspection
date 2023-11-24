@@ -1,14 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import sys
-from io import BytesIO
-
-sys.path.insert(
-    0, "C:/Users/chris/OneDrive/Documents/GitHub/thermographic_inspection/preprocess"
-)
 from preprocessFuncs import preprocess
 
-
+# Create Flask server
 app = Flask(__name__)
 CORS(app)
 
@@ -16,23 +10,26 @@ CORS(app)
 coldPath = None
 hotPath = None
 
-
 @app.route("/upload", methods=["POST", "GET"])
 def uploadFile():
+    # Check if a file is in the request
     if "file" not in request.files:
         return jsonify({"message": "No file uploaded"})
-
+    
+    # Get file, file name, and video type
     file = request.files["file"]
     fileName = file.filename
     videoType = request.form["type"]
 
+    # Check if the file is empty
     if fileName == "":
         return jsonify({"message": "No file selected"})
-
-    # Check if file is video
+    
+    # Check if the file is a video
     if file.filename.split(".")[-1] not in ["mp4", "avi"]:
         return jsonify({"message": "File is not a video"})
-
+    
+    # Save the file
     file.save("temp/" + file.filename)
     if videoType == "cold":
         global coldPath
@@ -46,11 +43,13 @@ def uploadFile():
 
 @app.route("/preprocess", methods=["POST", "GET"])
 def preprocessVideo():
+    # Check if both videos are uploaded
     if coldPath is None:
         return jsonify({"message": "Cold video not uploaded"})
     elif hotPath is None:
         return jsonify({"message": "Hot video not uploaded"})
     
+    # Preprocess the videos
     resultPath = preprocess(coldPath, hotPath, "client/public/", method="PCT")
     resultPath = resultPath.removeprefix("client/public/")
 
@@ -58,4 +57,5 @@ def preprocessVideo():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8080)
+    app.run(debug=True, port=8080)  # CORS does not work with default port 5000
+
