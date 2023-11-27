@@ -39,7 +39,7 @@ def display(arrays: list[np.ndarray], names: list[str], title: str):
     -------
     path to saved plot
     """
-    if len(arrays) >= 2:
+    if len(arrays) > 2:
         rows = len(arrays) // 2
         cols = 2
         fig, axes = plt.subplots(rows, cols)
@@ -58,6 +58,21 @@ def display(arrays: list[np.ndarray], names: list[str], title: str):
 
         plt.savefig(title + "plot.png")
         return title + "plot.png"
+    elif len(arrays) == 2:
+        fig, axes = plt.subplots(1, 2)
+        fig.suptitle(title)
+
+        images = []
+        for i, arr in enumerate(arrays):
+            images.append(axes[i].imshow(normalize(arr), cmap="jet"))
+            axes[i].label_outer()
+            axes[i].set_title(names[i])
+
+        fig.colorbar(images[0], ax=axes, orientation="horizontal", fraction=0.1)
+
+        plt.savefig(title + "plot.png")
+        return title + "plot.png"
+
     else:
         # Display single image
         plt.imshow(arrays[0], cmap="jet")

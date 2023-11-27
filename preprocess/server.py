@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from preprocessFuncs import preprocess
+import json
 
 # Create Flask server
 app = Flask(__name__)
@@ -51,9 +52,13 @@ def preprocessVideo():
     
     # Get the method
     method = request.form["method"]
+    options = request.form["options"]
+    options = json.loads(options)
+
+    print(options)
     
     # Preprocess the videos
-    resultPath = preprocess(coldPath, hotPath, "client/public/", method=method)
+    resultPath = preprocess(coldPath, hotPath, "client/public/", method=method, options=options)
     resultPath = resultPath.removeprefix("client/public/")
 
     return jsonify({"message": "Video preprocessed", "resultPath": resultPath})

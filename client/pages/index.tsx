@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import FileUpload from "@/components/FileUpload";
 import ProcessButton from "@/components/ProcessButton";
 
-function home() {
+function Home() {
   const [resPath, setResPath] = useState<string>("");
 
   return (
@@ -16,4 +16,4 @@ function home() {
   );
 }
 
-export default home;
+export default Home;

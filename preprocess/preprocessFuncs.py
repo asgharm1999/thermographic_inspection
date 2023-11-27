@@ -127,7 +127,7 @@ def createMask(path1, path2):
     return newPath1, newPath2
 
 
-def preprocess(coldPath, hotPath, savePath, method="PCT", **kwargs):
+def preprocess(coldPath, hotPath, savePath, method="PCT", options={}):
     """Preprocesses two videos and saves the results.
 
     Args:
@@ -135,7 +135,6 @@ def preprocess(coldPath, hotPath, savePath, method="PCT", **kwargs):
         hotPath (str): Path to hot video
         savePath (str): Path to save results, excluding file extension
         method (str, optional): The preprocessing method to use. Defaults to "PCT".
-        **kwargs: Keyword arguments for preprocessing methods
 
     Raises:
         Exception: Invalid method
@@ -161,7 +160,7 @@ def preprocess(coldPath, hotPath, savePath, method="PCT", **kwargs):
     if method == "PCT":
         # Perform PCT
         print("Performing PCT...")
-        numEOFs = kwargs.get("numEOFs", 6)
+        numEOFs = int(options.get("numEOFs", 6))
         EOFs = PCT(hot, norm_method="mean reduction", EOFs=numEOFs)
 
         # Display EOFs
@@ -178,7 +177,7 @@ def preprocess(coldPath, hotPath, savePath, method="PCT", **kwargs):
     elif method == "SPCT":
         # Perform SPCT
         print("Performing SPCT...")
-        numEOFs = kwargs.get("numEOFs", 6)
+        numEOFs = int(options.get("numEOFs", 6))
         EOFs = SPCT(hot, EOFs=numEOFs)
 
         # Display EOFs
@@ -195,7 +194,7 @@ def preprocess(coldPath, hotPath, savePath, method="PCT", **kwargs):
     elif method == "ESPCT":
         # Perform ESPCT
         print("Performing ESPCT...")
-        numEOFs = kwargs.get("numEOFs", 6)
+        numEOFs = int(options.get("numEOFs", 6))
         EOFs = ESPCT(hot, k=8, EOFs=numEOFs)
 
         # Display EOFs
