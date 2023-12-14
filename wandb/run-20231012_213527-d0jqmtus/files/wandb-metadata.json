@@ -1,0 +1,47 @@
+{
+    "os": "Windows-10-10.0.22621-SP0",
+    "python": "3.11.5",
+    "heartbeatAt": "2023-10-13T01:35:28.688125",
+    "startedAt": "2023-10-13T01:35:27.724030",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "c:\\Users\\chris\\OneDrive\\Documents\\GitHub\\thermographic_inspection\\models\\Segformer\\train.py",
+    "codePathLocal": "models\\Segformer\\train.py",
+    "codePath": "models\\Segformer\\train.py",
+    "host": "potato",
+    "username": "chris",
+    "executable": "C:\\Users\\chris\\anaconda3\\envs\\Research\\python.exe",
+    "cpu_count": 8,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 2496.0,
+        "min": 0.0,
+        "max": 2496.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2496.0,
+            "min": 0.0,
+            "max": 2496.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 953.1005821228027,
+            "used": 307.82670974731445
+        }
+    },
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 3060 Laptop GPU",
+            "memory_total": 6442450944
+        }
+    ],
+    "memory": {
+        "total": 15.743953704833984
+    }
+}

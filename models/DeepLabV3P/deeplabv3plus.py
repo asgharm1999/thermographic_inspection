@@ -122,9 +122,9 @@ def DeepLabV3Plus(inputShape, numClasses):
         include_top=False,
         weights="imagenet",
         input_tensor=inputs,
-        input_shape=inputShape,
-        pooling=None,
-        classes=numClasses,
+        # input_shape=inputShape,
+        # pooling=None,
+        # classes=numClasses,
     )
     encoder.trainable = False
     encoderOutput = encoder.get_layer("block13_pool").output
@@ -155,6 +155,10 @@ def DeepLabV3Plus(inputShape, numClasses):
 
 
 # Test
-# if __name__ == "__main__":
-#     model = DeepLabV3Plus((256, 256, 3), 4)
-#     model.summary()
+if __name__ == "__main__":
+    model = DeepLabV3Plus((480, 640, 3), 4)
+    model.summary()
+
+    import numpy as np
+
+    test = model.predict(np.zeros((1, 480, 640, 3)))

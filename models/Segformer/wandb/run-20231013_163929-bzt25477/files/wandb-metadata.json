@@ -1,0 +1,58 @@
+{
+    "os": "Windows-10-10.0.22621-SP0",
+    "python": "3.11.5",
+    "heartbeatAt": "2023-10-13T20:39:30.236701",
+    "startedAt": "2023-10-13T20:39:29.330399",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--epochs",
+        "1",
+        "--name",
+        "testing"
+    ],
+    "state": "running",
+    "program": "C:\\Users\\chris\\OneDrive\\Documents\\GitHub\\thermographic_inspection\\models\\Segformer\\train.py",
+    "codePathLocal": "train.py",
+    "codePath": "models\\Segformer\\train.py",
+    "git": {
+        "remote": "https://github.com/asgharm1999/thermographic_inspection.git",
+        "commit": "51e0447e98b545cdc6a2876b9537e64abef6fe53"
+    },
+    "email": "christophersetiabudi@gmail.com",
+    "root": "C:/Users/chris/OneDrive/Documents/GitHub/thermographic_inspection",
+    "host": "potato",
+    "username": "chris",
+    "executable": "C:\\Users\\chris\\anaconda3\\envs\\Research\\python.exe",
+    "cpu_count": 8,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 2496.0,
+        "min": 0.0,
+        "max": 2496.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2496.0,
+            "min": 0.0,
+            "max": 2496.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 953.1005821228027,
+            "used": 315.1356391906738
+        }
+    },
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 3060 Laptop GPU",
+            "memory_total": 6442450944
+        }
+    ],
+    "memory": {
+        "total": 15.743953704833984
+    }
+}
