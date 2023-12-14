@@ -21,12 +21,15 @@ def thermographic_preprocessing(image_seq, cold_img_seq):
     # Apply refined median filter
     image_seq = signal.medfilt(image_seq, kernel_size=3)
 
-    # Take logarithm
+    # Take logarithm 
     log_image_seq = np.log(image_seq)
+
+    # Flatten to 2D array for polyfit 
+    log_image_seq_2d = log_image_seq.reshape(log_image_seq.shape[0], -1)
 
     # Fit 5th order polynomial along time axis
     poly_coeff = np.polyfit(np.arange(log_image_seq.shape[0]), 
-                            log_image_seq.transpose(1,2,0), 5)
+                            log_image_seq_2d, 5)
     
     poly_coeff = poly_coeff[:, np.newaxis]  # Shape is now (5, 1)
     
