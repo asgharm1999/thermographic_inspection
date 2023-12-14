@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from PCT import PCT, SPCT, ESPCT, thermographic_preprocessing
+from PCT import PCT, SPCT, ESPCT
 from PPT import PPT
 from display import display
 import os
@@ -157,7 +157,7 @@ def preprocess(coldPath, hotPath, savePath, method="PCT", options={}):
     except FileExistsError:
         pass
 
-    print(thermographic_preprocessing(hot, cold))
+    # print(thermographic_preprocessing(hot, cold))
 
     if method == "PCT":
         # Perform PCT
@@ -234,5 +234,5 @@ if __name__ == "__main__":
         "videos/2023_12_11_cold_15.avi",
         "videos/2023_12_11_hot_15.avi",
         "images/2023_12_11_small_15/",
-        method="thermographic_preprocessing",
+        method="PCT",
     )
