@@ -8,6 +8,36 @@ Provides function to perform Principal Component Thermography (PCT) on a video
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import SparsePCA
+import scipy.signal as signal 
+
+def thermographic_preprocessing(image_seq, cold_img_seq):
+   
+    # Take average of cold image sequence
+    average_cold_img = np.mean(cold_img_seq, axis=0)  
+    
+    # Subtract averaged cold image
+    image_seq = image_seq - average_cold_img
+    
+    # Apply refined median filter
+    image_seq = signal.medfilt(image_seq, kernel_size=3)
+
+    # Take logarithm 
+    log_image_seq = np.log(image_seq)
+
+    # Flatten to 2D array for polyfit 
+    log_image_seq_2d = log_image_seq.reshape(log_image_seq.shape[0], -1)
+
+    # Fit 5th order polynomial along time axis
+    poly_coeff = poly_coeff[:, np.newaxis]  # Shape is now (5, 1)
+ 
+    # Compute 1st and 2nd derivative sequences
+    deriv1_seq = np.polyval(np.polyder(poly_coeff, m=1),  
+                            np.arange(log_image_seq.shape[0]))
+        
+    deriv2_seq = np.polyval(np.polyder(poly_coeff, m=2),
+                            np.arange(log_image_seq.shape[0]))
+    
+    return deriv1_seq, deriv2_seq
 
 
 def PCT(video, norm_method = "col-wise standardize", EOFs = 2):

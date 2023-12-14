@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from PCT import PCT, SPCT, ESPCT
+from PCT import PCT, SPCT, ESPCT, thermographic_preprocessing
 from PPT import PPT
 from display import display
 import os
@@ -45,8 +45,8 @@ def createMask(path1, path2):
     cap1 = cv2.VideoCapture(path1)
     cap2 = cv2.VideoCapture(path2)
     fps = cap1.get(cv2.CAP_PROP_FPS)
-    newPath1 = path1.replace(".mp4", "_masked.mp4")
-    newPath2 = path2.replace(".mp4", "_masked.mp4")
+    newPath1 = path1.replace(".avi", "_masked.mp4")
+    newPath2 = path2.replace(".avi", "_masked.mp4")
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
     # Read videos, and skip frames that are blank
@@ -157,6 +157,8 @@ def preprocess(coldPath, hotPath, savePath, method="PCT", options={}):
     except FileExistsError:
         pass
 
+    print(thermographic_preprocessing(hot, cold))
+
     if method == "PCT":
         # Perform PCT
         print("Performing PCT...")
@@ -229,8 +231,8 @@ def preprocess(coldPath, hotPath, savePath, method="PCT", options={}):
 
 if __name__ == "__main__":
     preprocess(
-        "videos/2023-11-10-60-before-left-straight.mp4",
-        "videos/2023-11-10-60-after-left-straight.mp4",
-        "images/2023-11-10-60-left-straight/",
-        method="PCT",
+        "videos/2023_12_11_cold_15.avi",
+        "videos/2023_12_11_hot_15.avi",
+        "images/2023_12_11_small_15/",
+        method="thermographic_preprocessing",
     )
