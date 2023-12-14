@@ -2,3 +2,4 @@ numpy==1.24.4
 scikit-learn==1.2.1
 opencv-python==4.8.0.74
 scipy==1.10.0
+matplotlib==3.7.4
