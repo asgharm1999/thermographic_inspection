@@ -8,39 +8,55 @@ Provides function to perform Principal Component Thermography (PCT) on a video
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import SparsePCA
-import scipy.signal as signal 
+import scipy.signal as signal
+import itertools
 
-# def thermographic_preprocessing(image_seq, cold_img_seq):
-   
-#     # Take average of cold image sequence
-#     average_cold_img = np.mean(cold_img_seq, axis=0)  
-    
-#     # Subtract averaged cold image
-#     image_seq = image_seq - average_cold_img
-    
-#     # Apply refined median filter
-#     image_seq = signal.medfilt(image_seq, kernel_size=3)
 
-#     # Take logarithm 
-#     log_image_seq = np.log(image_seq)
+def thermographic_preprocessing(hot_seq, cold_seq):
+    """
+    Performs thermographic preprocessing on a sequence of images
 
-#     # Flatten to 2D array for polyfit 
-#     log_image_seq_2d = log_image_seq.reshape(log_image_seq.shape[0], -1)
+    hot_seq is 3D array of shape (frames, height, width)
+    cold_seq is 3D array of shape (frames, height, width)
+    deriv1_seq is 3D array of shape (frames, height, width)
+    deriv2_seq is 3D array of shape (frames, height, width)
 
-#     # Fit 5th order polynomial along time axis
-#     poly_coeff = np.polyfit(np.arange(log_image_seq.shape[0]), 
-#                             log_image_seq_2d, 5)
+    deriv1_seq and deriv2_seq should have same height and width as hot_seq
+    """
+      
+    # Take average of cold image sequence
+    cold_avg = np.mean(cold_seq, axis=0) # Example dimension (72, 30) 
     
-#     poly_coeff = poly_coeff[:, np.newaxis]  # Shape is now (5, 1)
+    # Subtract averaged cold image
+    hot_sub = hot_seq - cold_avg # Example dimension (3780, 72, 30)
+    print(np.max(hot_sub))
+    print(np.min(hot_sub))
+
+    hot_sub = hot_seq
+    print(np.max(hot_sub))
+    print(np.min(hot_sub))   
+    # Apply refined median filter
+    hot_filt = np.array([signal.medfilt(frame, 3) for frame in hot_sub])
+    print(np.max(hot_filt))
+    print(np.min(hot_filt))
+
+    # Fit 5th order polynomial along time axis of log image sequence for every pixel
+    xdata = np.arange(len(hot_filt))
+    fitted = []
+    for i in range(hot_filt.shape[1]):
+        for j in range(hot_filt.shape[2]):
+            ydata = np.log(hot_filt[:, i, j])
+            coef = np.polyfit(xdata, ydata, 5)
+            poly = np.polyval(coef, xdata)
+            fitted.append(poly)
+            
+    fitted = np.array(fitted).reshape(hot_filt.shape)
+
+    # Compute 1st and 2nd derivative sequences       
+    deriv1_seq = np.gradient(fitted, axis=0)
+    deriv2_seq = np.gradient(deriv1_seq, axis=0)
     
-#     # Compute 1st and 2nd derivative sequences
-#     deriv1_seq = np.polyval(np.polyder(poly_coeff, m=1),  
-#                             np.arange(log_image_seq.shape[0]))
-        
-#     deriv2_seq = np.polyval(np.polyder(poly_coeff, m=2),
-#                             np.arange(log_image_seq.shape[0]))
-    
-#     return deriv1_seq, deriv2_seq
+    return deriv1_seq, deriv2_seq
 
 
 def PCT(video, norm_method = "col-wise standardize", EOFs = 2):
