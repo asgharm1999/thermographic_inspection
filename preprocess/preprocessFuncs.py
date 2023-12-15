@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from PCT import PCT, SPCT, ESPCT
+from PCT import thermographic_preprocessing, PCT, SPCT, ESPCT
 from PPT import PPT
 from display import display
 import os
@@ -157,13 +157,13 @@ def preprocess(coldPath, hotPath, savePath, method="PCT", options={}):
     except FileExistsError:
         pass
 
-    # print(thermographic_preprocessing(hot, cold))
+    hot1, hot2 = thermographic_preprocessing(hot, cold)
 
     if method == "PCT":
         # Perform PCT
         print("Performing PCT...")
         numEOFs = int(options.get("numEOFs", 6))
-        EOFs = PCT(hot, norm_method="mean reduction", EOFs=numEOFs)
+        EOFs = PCT(hot1, norm_method="mean reduction", EOFs=numEOFs)
 
         # Display EOFs
         print("Displaying EOFs...")
