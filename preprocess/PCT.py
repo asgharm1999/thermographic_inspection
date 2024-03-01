@@ -25,7 +25,9 @@ def thermographic_preprocessing(hot_seq, cold_seq):
     """
       
     # Take average of cold image sequence
-    cold_avg = np.mean(cold_seq, axis=0) # Example dimension (72, 30) 
+    cold_avg = np.mean(cold_seq, axis=0) # Example dimension (72, 30)
+    print(np.max(cold_seq))
+    print(np.min(cold_seq))
     
     # Subtract averaged cold image
     hot_sub = hot_seq - cold_avg # Example dimension (3780, 72, 30)
@@ -45,16 +47,37 @@ def thermographic_preprocessing(hot_seq, cold_seq):
     fitted = []
     for i in range(hot_filt.shape[1]):
         for j in range(hot_filt.shape[2]):
-            ydata = np.log(hot_filt[:, i, j])
+            # ydata = np.log(hot_filt[:, i, j])
+            ydata = np.log(hot_filt[:, i, j]).astype(np.float32)
             coef = np.polyfit(xdata, ydata, 5)
             poly = np.polyval(coef, xdata)
             fitted.append(poly)
             
     fitted = np.array(fitted).reshape(hot_filt.shape)
+    # Check if any values in "fitted" are NaN
+    has_nan = np.isnan(fitted)
+
+    # Count the number of NaN instances
+    num_nan = np.sum(has_nan)
+
+    print("Number of NaN instances in fitted:", num_nan)
 
     # Compute 1st and 2nd derivative sequences       
     deriv1_seq = np.gradient(fitted, axis=0)
     deriv2_seq = np.gradient(deriv1_seq, axis=0)
+    # Check if any values in "deriv1" are NaN
+    has_nan = np.isnan(deriv1_seq)
+
+    # Count the number of NaN instances
+    num_nan = np.sum(has_nan)
+    print("Number of NaN instances in deriv1:", num_nan)
+
+    # Check if any values in "deriv1" are NaN
+    has_nan = np.isnan(deriv2_seq)
+
+    # Count the number of NaN instances
+    num_nan = np.sum(has_nan)
+    print("Number of NaN instances in deriv2:", num_nan)
     
     return deriv1_seq, deriv2_seq
 
