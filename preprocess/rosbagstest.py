@@ -11,7 +11,7 @@ from display import display
 
 
 # Path to your .db3 ROS2 bag file
-bag_path = '/home/arilab-pc/Downloads/thermography_02_28_2024/GreyAlRectDoublePlate30s.bag/'
+bag_path = '/home/arilab-pc/Downloads/thermography_02_28_2024/blackAlRectPlate30s.bag/'
 bag_posix_path = Path(bag_path)
 
 # Topic you are interested in
@@ -98,12 +98,12 @@ print(f"Overall Maximum Value: {overall_max_value}")
 print(f"Overall Minimum Value: {overall_min_value}")
 print(f"Dimensions of the video: {frames.shape}")
 
-hot1, hot2 = thermographic_preprocessing(frames[2:, :, :], frames[0:2, :, :])
+# hot1, hot2 = thermographic_preprocessing(frames[2:, :, :], frames[0:2, :, :])
 
 # Perform PCT
 print("Performing PCT...")
 numEOFs = 6
-EOFs = PCT(hot1, norm_method="mean reduction", EOFs=numEOFs)
+EOFs = PCT(frames, norm_method="mean reduction", EOFs=numEOFs)
 
 # Display EOFs
 print("Displaying EOFs...")
