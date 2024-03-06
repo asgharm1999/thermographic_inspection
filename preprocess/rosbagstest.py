@@ -98,7 +98,8 @@ print(f"Overall Maximum Value: {overall_max_value}")
 print(f"Overall Minimum Value: {overall_min_value}")
 print(f"Dimensions of the video: {frames.shape}")
 
-# hot1, hot2 = thermographic_preprocessing(frames[2:, :, :], frames[0:2, :, :])
+
+hot1, hot2 = thermographic_preprocessing(frames[2:, :, :], frames[0:2, :, :])
 
 # Perform PCT
 print("Performing PCT...")
