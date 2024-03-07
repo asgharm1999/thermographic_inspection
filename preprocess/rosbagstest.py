@@ -8,10 +8,23 @@ import cv2
 from PCT import thermographic_preprocessing, PCT, SPCT, ESPCT
 from PPT import PPT
 from display import display
+import argparse
+
+# Create the parser
+parser = argparse.ArgumentParser(description='Process some integers.')
+
+# Add the arguments
+parser.add_argument('bag_path', type=str, help='The path to the .db3 ROS2 bag file')
+
+# Parse the arguments
+args = parser.parse_args()
+
+# Now you can use args.bag_path as your bag_path
+bag_path = args.bag_path # Path to your .db3 ROS2 bag file
 
 
-# Path to your .db3 ROS2 bag file
-bag_path = '/home/arilab-pc/Downloads/thermography_02_28_2024/blackAlRectPlate30s.bag/'
+
+#bag_path = '/home/arilab-pc/Downloads/thermography_02_28_2024/blackAlRectPlate30s.bag/'
 bag_posix_path = Path(bag_path)
 
 # Topic you are interested in
