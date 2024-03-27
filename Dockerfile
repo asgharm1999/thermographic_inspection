@@ -4,6 +4,9 @@ FROM ubuntu:22.04
 # Set the working directory in the container
 WORKDIR /app
 
+# Set DEBIAN_FRONTEND to noninteractive to avoid getting stuck on prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
@@ -36,5 +39,8 @@ COPY . .
 # Source the ROS2 setup file
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 
+# Reset DEBIAN_FRONTEND environment variable
+ENV DEBIAN_FRONTEND=
+
 # Specify the command to run your Python script
-CMD ["python3", "preprocess/rosbagstest.py"]
+#CMD ["python3", "preprocess/rosbagstest.py"]
