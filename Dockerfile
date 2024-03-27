@@ -1,6 +1,9 @@
 # Stage 1: Base image with Ubuntu 22.04
 FROM ubuntu:22.04 AS base
 
+# Set DEBIAN_FRONTEND to noninteractive to avoid getting stuck on prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
@@ -59,6 +62,9 @@ RUN while read requirement; do \
 # Copy the project files to the working directory
 COPY . .
 
+
+# Reset DEBIAN_FRONTEND environment variable
+ENV DEBIAN_FRONTEND=
 
 # Specify the command to run your Python script
 # CMD ["bash", "-c", "source ~/.bashrc && python3 preprocess/rosbagstest.py"]
