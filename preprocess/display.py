@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
+from datetime import datetime
 
 
 def normalize(x: np.ndarray):
@@ -39,6 +40,12 @@ def display(arrays: list[np.ndarray], names: list[str], title: str):
     -------
     path to saved plot
     """
+    # Get current time
+    now = datetime.now()
+
+    # Format as string
+    time_string = now.strftime("%Y%m%d_%H%M%S")
+
     if len(arrays) > 2:
         rows = len(arrays) // 2
         cols = 2
@@ -56,8 +63,9 @@ def display(arrays: list[np.ndarray], names: list[str], title: str):
 
         fig.colorbar(images[0], ax=axes, orientation="horizontal", fraction=0.1)
 
-        plt.savefig(title + "plot.png")
-        return title + "plot.png"
+        # Save plot with time in filename
+        plt.savefig(title + f"plot_{time_string}.png")
+        return title + f"plot_{time_string}.png"
     elif len(arrays) == 2:
         fig, axes = plt.subplots(1, 2)
         fig.suptitle(title)
@@ -70,8 +78,9 @@ def display(arrays: list[np.ndarray], names: list[str], title: str):
 
         fig.colorbar(images[0], ax=axes, orientation="horizontal", fraction=0.1)
 
-        plt.savefig(title + "plot.png")
-        return title + "plot.png"
+        # Save plot with time in filename
+        plt.savefig(title + f"plot_{time_string}.png")
+        return title + f"plot_{time_string}.png"
 
     else:
         # Display single image
@@ -79,5 +88,6 @@ def display(arrays: list[np.ndarray], names: list[str], title: str):
         plt.title(title)
         plt.colorbar()
 
-        plt.savefig(title + "plot.png")
-        return title + "plot.png"
+        # Save plot with time in filename
+        plt.savefig(title + f"plot_{time_string}.png")
+        return title + f"plot_{time_string}.png"
