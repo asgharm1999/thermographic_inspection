@@ -60,7 +60,7 @@ RUN while read requirement; do \
 
 
 # Copy the project files to the working directory
-COPY . .
+#COPY . .
 
 
 # Reset DEBIAN_FRONTEND environment variable
