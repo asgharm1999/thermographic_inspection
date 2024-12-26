@@ -11,6 +11,7 @@ from display import display
 import argparse
 from pathlib import Path
 from matplotlib.animation import FuncAnimation
+from PulseThermography import PulseThermography
 
 def main():
     # Create the parser
@@ -43,10 +44,13 @@ def main():
     # Topic you are interested in
     topic_name = '/image_raw'
 
-    # Initialize overall max and min values
+    # Initialize values for some key variables in the code
     overall_max_value = None
     overall_min_value = None
     frames = None
+    raw_scaled_frames = None
+    raw_message_height = 0
+    raw_message_width = 0
 
     # Create reader instance to display the first frame and select RoI
     with AnyReader([bag_posix_path]) as reader:
@@ -75,6 +79,9 @@ def main():
 
     cv2.destroyAllWindows()
 
+    raw_message_height = msg.height
+    raw_message_width = msg.width
+
     # Create reader instance to calculate overall max and min values in high dynamic range of thermal video pixel values
     with AnyReader([bag_posix_path]) as reader:
         connections = [x for x in reader.connections if x.topic == topic_name]
@@ -93,6 +100,44 @@ def main():
                 overall_max_value = frame_max_value if overall_max_value is None else max(overall_max_value, frame_max_value)
                 overall_min_value = frame_min_value if overall_min_value is None else min(overall_min_value, frame_min_value)
 
+    frame_number = 0  # Initialize frame number outside the loop
+
+    # Create reader instance to display the selected RoI region in the normalized video
+    with AnyReader([bag_posix_path]) as reader:
+        connections = [x for x in reader.connections if x.topic == topic_name]
+
+        for connection, timestamp, rawdata in reader.messages(connections=connections):
+            msg = reader.deserialize(rawdata, connection.msgtype)
+            image_data = np.frombuffer(msg.data, dtype=np.uint16)
+
+            if image_data is not None:
+                # Normalize and scale the intensity using custom min and max values
+                img_8bit = exposure.rescale_intensity(image_data.reshape(msg.height, msg.width), in_range=(overall_min_value, overall_max_value), out_range=(0, 1))
+                img_8bit = img_as_ubyte(img_8bit)
+
+                frame_number += 1  # Increment frame number
+
+                # Stack the frames into a 3D array
+                if raw_scaled_frames is None:
+                    raw_scaled_frames = img_8bit[np.newaxis, :]
+                else:
+                    raw_scaled_frames = np.concatenate((raw_scaled_frames, img_8bit[np.newaxis, :]), axis=0)
+
+    # Save raw_scaled_frames as mp4 video
+    output_path = str(bag_path + 'output.mp4')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    
+    out = cv2.VideoWriter(output_path, fourcc, 30.0, (raw_message_width, raw_message_height), False)
+    
+    for frame in raw_scaled_frames:
+        # Reshape frame to match expected dimensions and convert to uint8
+        frame = frame.reshape(raw_message_height, raw_message_width)  # Reshape to 480x640
+        out.write(frame)
+    
+    out.release()
+    print('Raw scaled video saved!')
+
+    frame_number = 0  # Initialize frame number outside the loop
 
     # Create reader instance to display the selected RoI region in the normalized video
     with AnyReader([bag_posix_path]) as reader:
@@ -108,9 +153,13 @@ def main():
                 img_8bit = exposure.rescale_intensity(cropped_image_data, in_range=(overall_min_value, overall_max_value), out_range=(0, 1))
                 img_8bit = img_as_ubyte(img_8bit)
 
+                frame_number += 1  # Increment frame number
+
+
                 # Display the image using OpenCV
                 cv2.namedWindow("Video", cv2.WINDOW_NORMAL)
                 cv2.resizeWindow("Video", 640, 480)  # Set the window size to 640 x 480 pixels
+                # cv2.putText(img_8bit, 'Frame: {}'.format(frame_number), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)                
                 cv2.imshow("Video", img_8bit)
                 cv2.waitKey(1)  # Wait for 1ms to allow the frame to be displayed
                 # Stack the frames into a 3D array
@@ -118,11 +167,44 @@ def main():
                     frames = cropped_image_data[np.newaxis, :]
                 else:
                     frames = np.concatenate((frames, cropped_image_data[np.newaxis, :]), axis=0)
+                    if frame_number == 1500:
+                        break
 
 
     print(f"Overall Maximum Value: {overall_max_value}")
     print(f"Overall Minimum Value: {overall_min_value}")
     print(f"Dimensions of the video: {frames.shape}")
+
+    # # Create an instance of the PulseThermography class
+    # frame_rate = 60  # Set the frame rate of your thermal video
+    # analysis = PulseThermography(frames, frame_rate)
+
+    # # Set TSR settings
+    # tsr_order = 5
+    # analysis.set_tsr(tsr_order)
+
+    # # Set background subtraction frames
+    # frames_to_average = 5
+    # analysis.set_frames_to_average(frames_to_average)
+
+    # # Set PPT settings
+    # ppt_window_type = 'hamming'
+    # analysis.set_ppt(ppt_window_type, [], 1)
+
+    # # Define the desired processing sequence
+    # processing_sequence = ['estimate_flash_frame', 'subtract_reference_frame', 'perform_tsr', 'perform_ppt']
+
+    # # Perform the analysis pipeline with the specified sequence
+    # analysis.perform_analysis(processing_sequence)
+
+    # # Access the processed data
+    # tsr_temperature = analysis.tsr_temperature
+    # ppt_phase = analysis.ppt_phase
+
+    # # Visualize the results
+    # analysis.imshow(tsr_temperature[:, :, 0])  # Display the first frame of TSR temperature
+    # analysis.imshow(ppt_phase[:, :, 0])  # Display the first frequency bin of PPT phase
+
 
 
     hot1, hot2, hot1_img, hot2_img = thermographic_preprocessing(frames[1750:, :, :], frames[0:2, :, :])
@@ -185,11 +267,11 @@ def main():
     print("Performing PCT...")
     numEOFs = 6
     
-    which_deriv = [0, 1, 2]  # or any other list of integers
+    which_deriv = [0]  # or any other list of integers
 
     for deriv in which_deriv:
         if deriv == 0:
-            EOFs = PCT(frames, norm_method="mean reduction", EOFs=numEOFs)
+            EOFs = PCT(frames[2400:, :, :], norm_method="mean reduction", EOFs=numEOFs)
             process_and_save_EOFs(bag_path, deriv, EOFs, numEOFs)
         elif deriv == 1:
             EOFs = PCT(hot1, norm_method="mean reduction", EOFs=numEOFs)
